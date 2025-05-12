@@ -1,7 +1,7 @@
 /**
  * ShopSystem.js
  * D&D 5e Shop System for Roll20
- * Version: 1.0.0
+ * Version: 1.0.1
  * 
  * This system handles shop management, item database, and transactions
  * for D&D 5e games in Roll20. It provides a complete interface for
@@ -61,7 +61,7 @@ const CONFIG = {
         HAGGLE: {
             BASE_DC: 15,
             ADVANTAGE_THRESHOLD: 5,
-            MAX_ATTEMPTS: 10,
+            DEFAULT_STORE_ATTEMPTS: 3,
             SKILLS: ["deception", "persuasion", "intimidation","Slight of Hand"]
         },
         
@@ -77,7 +77,7 @@ const CONFIG = {
         DISPLAY: {
             ITEMS_PER_PAGE: 10, // check what this does
             USE_ROLL_TEMPLATES: true, // check what this does
-            DEFAULT_TEMPLATE: "default",
+            DEFAULT_TEMPLATE: "default", // check what this does
             // [TAG: CD_CONFIG_STOCK_THRESHOLD] Add threshold for stock display warning
             STOCK_DISPLAY_THRESHOLD: 30, 
             CURRENCY_SYMBOLS: {
@@ -167,7 +167,7 @@ const CONFIG = {
             DB_PREFIX: "!itemdb",
             SUBCOMMANDS: {
                 SHOP: ["open", "list", "add", "remove", "buy", "sell", "basket", "haggle"],
-                DB: ["init", "import", "end", "list", "normalize", "cancel", "add", "add_param", "add_save"]
+                DB: ["init", "import", "end", "list", "cancel", "add", "add_param", "add_save"]
             }
         },
         
@@ -420,31 +420,6 @@ const ShopSystem = {
             const playerID = msg ? msg.playerid : null;
             if (!playerID) return false; // Cannot check if no playerID
             
-            /* // Removed object check as we consistently pass playerid string now
-            if (typeof playerID === 'object') {
-                if (playerID.who && playerID.who.endsWith('(GM)')) {
-                    return true;
-                }
-                // If it has a playerid, use that
-                if (playerID.playerid) {
-                    playerID = playerID.playerid;
-                }
-            }
-            
-            // 2. Try to get the player object and check
-            try {
-            const player = getObj('player', playerID);
-            if (!player) return false;
-            
-                // Rely SOLELY on the _isGM flag
-                const isGMStatus = player.get('_isGM');
-                ShopSystem.utils.log(`isGM Check: playerID=${playerID}, Name=${player.get('_displayname')}, _isGM=${isGMStatus}`, "debug"); // Added debug log
-                return isGMStatus;
-            } catch (e) {
-                // Safety fallback if anything goes wrong
-                ShopSystem.utils.log(`Error in isGM check for playerID ${playerID}: ${e.message}`, "error");
-                return false;
-            } */
         },
 
         // [TAG: SHOP_7_showMenu_MODIFIED]
@@ -976,6 +951,57 @@ const ShopSystem = {
             // Always return false for now, forcing manual update message.
             return false;
         },
+
+        // [TAG: UTIL_GET_TOKEN_IMAGE_ASYNC] Helper to get character token image tag asynchronously
+        getCharacterTokenImgTagAsync: function(characterId, altText = 'Token', style = 'width: 25px; height: 25px; vertical-align: middle; margin-right: 5px; border-radius: 3px;', callback) {
+            const char = getObj('character', characterId);
+            if (!char) {
+                ShopSystem.utils.log(`getCharacterTokenImgTagAsync: Character \'${characterId}\' not found.`, 'error');
+                callback('👤 '); // Default icon
+                return;
+            }
+            const charName = char.get('name') || 'Unnamed Character';
+
+            char.get('defaulttoken', (defaultTokenJSON) => {
+                let tokenImage = null;
+                try {
+                    if (defaultTokenJSON && typeof defaultTokenJSON === 'string' && defaultTokenJSON.trim() !== '' && defaultTokenJSON.trim().toLowerCase() !== 'null') {
+                        const decodedTokenJSON = decodeURIComponent(defaultTokenJSON);
+                        const defaultTokenData = JSON.parse(decodedTokenJSON);
+                        tokenImage = defaultTokenData ? defaultTokenData.imgsrc : null;
+                    }
+                } catch (e) {
+                    ShopSystem.utils.log(`Error parsing defaulttoken for ${charName} (ID: ${characterId}): ${e.message}`, 'error');
+                }
+
+                if (!tokenImage || typeof tokenImage !== 'string' || tokenImage.trim() === '') {
+                    tokenImage = char.get('avatar');
+                }
+                if (!tokenImage || typeof tokenImage !== 'string' || tokenImage.trim() === '') {
+                    tokenImage = char.get('imgsrc');
+                }
+
+                if (tokenImage && typeof tokenImage === 'string' && tokenImage.trim() !== '') {
+                    let processedImageURL = tokenImage;
+                    if (!processedImageURL.startsWith('http')) {
+                        if (processedImageURL.includes('/max.')) processedImageURL = processedImageURL.replace('/max.', '/thumb.');
+                    } else {
+                        if (processedImageURL.includes('/max.')) processedImageURL = processedImageURL.replace('/max.', '/thumb.');
+                        else if (processedImageURL.includes('/med.')) processedImageURL = processedImageURL.replace('/med.', '/thumb.');
+                        if (processedImageURL.startsWith('http:')) processedImageURL = processedImageURL.replace('http:', 'https:');
+                    }
+                    
+                    if (processedImageURL.startsWith('https://') || processedImageURL.startsWith('http://')) {
+                        callback(`<img src=\"${processedImageURL}\" style=\"${style}\" alt=\"${altText}\" onerror=\"this.style.display='none';this.onerror=null;\">`);
+                    } else {
+                        ShopSystem.utils.log(`Potentially unsafe or relative image URL for ${charName}: ${processedImageURL}. Using default icon.`, 'warn');
+                        callback('👤 ');
+                    }
+                } else {
+                    callback('👤 ');
+                }
+            });
+        },
     },
 
     // [TAG: MERGED_5]
@@ -1232,61 +1258,6 @@ const ShopSystem = {
                         ShopSystem.utils.chat("❌ No import in progress!", playerID);
                     }
                     break;
-                case "normalize":
-                    // Normalize all prices in the database
-                    this.normalizeAllPrices()
-                        .then(result => {
-                            ShopSystem.utils.chat(`✅ Successfully normalized ${result.updated} items in the database.`, playerID);
-                        })
-                        .catch(error => {
-                            ShopSystem.utils.chat(`❌ Error normalizing database: ${error}`, playerID);
-                            ShopSystem.utils.log(error, 'error');
-                        });
-                    break;
-                case "normalize_item":
-                    if (args.length < 2) {
-                        ShopSystem.utils.chat("❌ Item ID required", playerID);
-                        return;
-                    }
-                    // Use existing normalizeItemPrice function and save back to database
-                    this.listItems('all', 'all').then(items => {
-                        const item = items.find(i => i.id === args[1]);
-                        if (!item) {
-                            ShopSystem.utils.chat("❌ Item not found", playerID);
-                            return;
-                        }
-                        const normalizedItem = this.normalizeItemPrice(item);
-                        // Save back to database
-                        const handout = findObjs({ _type: "handout", name: CONFIG.HANDOUT.DATABASE })[0];
-                        if (handout) {
-                            handout.get("gmnotes", (notes) => {
-                                try {
-                                    const data = JSON.parse(ShopSystem.utils.cleanHandoutNotes(notes));
-                                    let updated = false;
-                                    // Find and update the item
-                                    Object.keys(data.items).forEach(rarity => {
-                                        Object.keys(data.items[rarity]).forEach(category => {
-                                            const index = data.items[rarity][category].findIndex(i => i.id === args[1]);
-                                            if (index !== -1) {
-                                                data.items[rarity][category][index] = normalizedItem;
-                                                updated = true;
-                                            }
-                                        });
-                                    });
-                                    if (updated) {
-                                        handout.set("gmnotes", JSON.stringify(data, null, 2));
-                                        ShopSystem.utils.chat("✅ Item price normalized", playerID);
-                                        // Show updated item info
-                                        this.showItemInfo(args[1], playerID);
-                                    }
-                                } catch (error) {
-                                    ShopSystem.utils.chat("❌ Error updating database", playerID);
-                                    ShopSystem.utils.log(error, "error");
-                                }
-                            });
-                        }
-                        });
-                    break;
                 case "list":
                     const category = args.length > 1 ? args[1].toLowerCase() : 'all';
                     const rarity = args.length > 2 ? ShopSystem.utils.normalizeRarity(args[2]) : 'all';
@@ -1376,7 +1347,6 @@ const ShopSystem = {
                 "{{Database Actions=",
                 "[📥 Start Import](!itemdb import) [⛔ End Import](!itemdb end)",
                 "[✏️ Add Single Item](!itemdb add)",
-                "[💾 Normalize Prices](!itemdb normalize)",
                 "[📋 View All Items](!itemdb list all all)}}",
                 "{{Import Format=Each item should follow this format:\n\nItem Name\n- category: type of item\n- rarity: item rarity\n- price: amount in gp\n- weight: number\n- damage: dice type (weapons)\n- properties: list\n- type: item type\n- effect: description\n- description: details\n- attunement: yes/no\n- consumable: yes/no\n- source: book}}",
                 "{{Example=Dagger of Venom\n- category: weapons\n- rarity: rare\n- price: 250 gp\n- weight: 1\n- damage: 1d4 piercing\n- properties: finesse, light, thrown\n- type: simple\n- effect: Can use an action to coat the blade in poison\n- description: A magical dagger that can produce poison\n- attunement: yes\n- source: DMG}}",
@@ -1816,63 +1786,6 @@ const ShopSystem = {
             });
         },
 
-        // [TAG: DB_15_Normalize_Price_Data_in_an_Item] - probably not needed?
-        normalizeItemPrice: function(item) {
-            if (!item.price) {
-                item.price = { gp: 0 };
-                return item;
-            }
-            
-            // Calculate total copper value
-            let copper = ShopSystem.utils.toCopper(item.price);
-            
-            // Convert back to structured price
-            item.price = ShopSystem.utils.fromCopper(copper);
-            
-            return item;
-        },
-        
-        // [TAG: DB_16_Normalize_All_Prices_in_the_Database] - probably not needed?
-        normalizeAllPrices: function() {
-            const handout = findObjs({ _type: "handout", name: CONFIG.HANDOUT.DATABASE })[0];
-            if (!handout) {
-                ShopSystem.utils.chat("❌ Database not found! Initialize it first with !itemdb init");
-                return Promise.reject(new Error("Database not found"));
-            }
-            
-            return new Promise((resolve, reject) => {
-                handout.get("gmnotes", (notes) => {
-                    try {
-                        const cleanNotes = ShopSystem.utils.cleanHandoutNotes(notes);
-                        const data = JSON.parse(cleanNotes);
-                        let updated = 0;
-                        
-                        // Process all rarities and categories
-                        Object.keys(data.items).forEach(rarity => {
-                            Object.keys(data.items[rarity]).forEach(category => {
-                                if (Array.isArray(data.items[rarity][category])) {
-                                    data.items[rarity][category] = data.items[rarity][category].map(item => {
-                                        const normalizedItem = this.normalizeItemPrice(item);
-                                        updated++;
-                                        return normalizedItem;
-                                    });
-                                }
-                            });
-                        });
-                        
-                        // Save updated database
-                        handout.set("gmnotes", JSON.stringify(data, null, 2));
-                        ShopSystem.utils.chat(`✅ Normalized prices for ${updated} items`);
-                        resolve({ updated });
-                    } catch (error) {
-                        ShopSystem.utils.log(`Error normalizing prices: ${error.message}`, "error");
-                        ShopSystem.utils.chat("❌ Error normalizing prices in database");
-                        reject(error);
-                    }
-                });
-            });
-        },
-
         // [TAG: CD_DB_SHOW_ITEM_INFO]
         showItemInfo: function(itemId, playerID) {
             this.listItems('all', 'all').then(items => {
@@ -1900,7 +1813,7 @@ const ShopSystem = {
                     `{{Item Details=${itemDetails.join('\n')}}}`,
                     `{{Description=${item.description || 'No description available'}}}`,
                     "{{Actions=",
-                    `[❌ Remove from Database](!itemdb remove ${item.id}) [💰 Normalize Price](!itemdb normalize_item ${item.id}) [✏️ Update Item](!itemdb update ${item.id})`,
+                    `[❌ Remove from Database](!itemdb remove ${item.id}) [✏️ Update Item](!itemdb update ${item.id})`,
                     "}}",
                     "{{Navigation=",
                     `[📋 All Items](!itemdb list all all) [🏪 Shop](!shop)`,
@@ -2395,15 +2308,18 @@ const ShopSystem = {
     shop: {
         // [TAG: SHOP_103_157]
         HNDL_CMD_HandleShopCommand: function(msg, args) {
+            ShopSystem.utils.log(`HNDL_CMD_HandleShopCommand: Received args: ${JSON.stringify(args)}`, "debug");
             const playerID = msg.playerid;
             
             if (args.length === 0) {
+                shopSystem.utils.log(`HNDL_CMD_HandleShopCommand: args.length is 0, showing help.`, "debug");
                 this.SHPDIS_MD_ShowShopHelp(playerID);
                 return;
             }
             
             const command = args[0].toLowerCase();
-            
+            ShopSystem.utils.log(`HNDL_CMD_HandleShopCommand: command set to: "${command}" (from args[0])`, "debug");
+
             // Handler for setting individual shop parameters
             const handleSetParameter = (encodedName, value, paramType) => {
                 // [TAG: CD_SHOP_03_DECODE_SHOP_NAME]
@@ -2459,6 +2375,10 @@ const ShopSystem = {
                             price_modifiers: {
                                 buy: parseFloat(priceModifier?.trim()) || defaults.BUY_MODIFIER,
                                 sell: parseFloat(sellModifier?.trim()) || defaults.SELL_MODIFIER
+                            },
+                            haggle: {
+                                max_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
+                                remaining_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
                             },
                             description: description.trim(),
                             welcome_message: defaults.WELCOME_MESSAGE,
@@ -2739,6 +2659,20 @@ const ShopSystem = {
                     // Call the advanced setup menu with the active shop name and update mode
                     this.SHPDIS_MD_ShowSetupMenu(ShopSystem.state.activeShop.name, playerID, true);
                     break;
+                
+                case "haggle_reset":
+                    if (!ShopSystem.utils.isGM(msg)) return;
+                    shop = ShopSystem.state.activeShop;
+                    if (shop?.haggle) {
+                        shop.haggle.remaining_attempts = shop.haggle.max_attempts;
+                        ShopSystem.utils.sendGMMessage(`✅ Reset haggle attempts for ${shop.name}`);
+                        // Update the handout's gmnotes
+                        const shopHandout = getObj("handout", shop.id);
+                        if (shopHandout) {
+                            shopHandout.set("gmnotes", JSON.stringify(shop));
+                        }
+                    }
+                    break;
                     
                 case "stock":
                     // Route to stock management, passing the full msg object
@@ -2858,12 +2792,30 @@ const ShopSystem = {
                                 ShopSystem.utils.sendGMMessage("❌ Player ID missing for haggle_show_skills command.");
                                 break; 
                             }
+                            const targetPlayerName = getObj('player', showSkillsPlayerId)?.get('_displayname') || `PlayerID ${showSkillsPlayerId}`;
                             ShopSystem.basket.showHaggleSkillsMenu(showSkillsPlayerId);
+                            // Send confirmation to the GM who clicked the button
+                            ShopSystem.utils.sendGMMessage(`✅ Skill selection menu sent to ${targetPlayerName} for haggling.`);
                             break;
                         case "haggle_check":
-                            const skillType = args[2];
-                            const dc = args[3]; // DC passed from haggle menu
-                            ShopSystem.basket.handleHaggleCheck(playerID, skillType, dc);
+                            const playerId = args[2];
+                            const skillType = args[3];
+                            const dc = args[4];
+                            ShopSystem.basket.handleHaggleCheck(playerId, skillType, dc);
+                            break;
+                        case "send_player_to_basket":
+                            // Format: !shop basket send_player_to_basket [playerId] [basketType]
+                            const targetPlayerId = args[2];
+                            const basketType = args[3]; // 'sell' or 'buy'
+                            if (!targetPlayerId) {
+                                ShopSystem.utils.sendGMMessage("❌ No player ID provided for send_player_to_basket.");
+                                break;
+                            }
+                            if (basketType === 'sell') {
+                                ShopSystem.basket.viewSellBasket(targetPlayerId);
+                            } else {
+                                ShopSystem.basket.viewBasket(targetPlayerId);
+                            }
                             break;
                         case "haggle_roll":
                             const hagglePlayerId = args[2]; // Note: This assumes playerID might differ if GM triggers
@@ -2871,6 +2823,37 @@ const ShopSystem = {
                             const advantageState = args[4];
                             const haggleDC = args[5];
                             ShopSystem.basket.handleHaggleRoll(hagglePlayerId, haggleSkill, advantageState, haggleDC);
+                            break;
+                        case "haggle_manual":
+                            // Format: !shop basket haggle_manual [playerId] [SkillType] [DC] [RollResult]
+                            const manualPlayerId = args[2];
+                            const manualSkill = args[3];
+                            const manualDC = parseInt(args[4]);
+                            const manualRoll = parseInt(args[5]);
+                            if (!manualPlayerId || !manualSkill || isNaN(manualDC) || isNaN(manualRoll)) {
+                                ShopSystem.utils.sendGMMessage("❌ Missing or invalid parameters for haggle_manual command.");
+                                break;
+                            }
+                            // Reconstruct pending state if needed
+                            if (!state.ShopSystem.pendingHaggleRolls) state.ShopSystem.pendingHaggleRolls = {};
+                            if (!state.ShopSystem.pendingHaggleRolls[manualPlayerId]) {
+                                const haggleState = state.ShopSystem.haggleResults?.[manualPlayerId];
+                                if (haggleState) {
+                                    state.ShopSystem.pendingHaggleRolls[manualPlayerId] = {
+                                        skillType: manualSkill,
+                                        dc: manualDC,
+                                        advantage: 'manual',
+                                        haggleType: haggleState.tempHaggleType,
+                                        originalBuyBasketPriceCopper: haggleState.originalBuyBasketPriceCopper,
+                                        originalSellBasketPriceCopper: haggleState.originalSellBasketPriceCopper
+                                    };
+                                } else {
+                                    ShopSystem.utils.sendGMMessage(`❌ No haggle state found for player ${manualPlayerId}. Cannot process manual roll.`);
+                                    break;
+                                }
+                            }
+                            // Call handleHaggleRollResult with the manual roll value
+                            ShopSystem.basket.handleHaggleRollResult(manualRoll, manualPlayerId, manualRoll === 1, manualRoll === 20);
                             break;
                          case "haggle_accept":
                             const acceptPlayerId = args[2]; // Note: Assumes playerID might differ
@@ -2881,6 +2864,22 @@ const ShopSystem = {
                         case "haggle_deny":
                             const denyPlayerId = args[2]; // Note: Assumes playerID might differ
                             ShopSystem.basket.handleHaggleDeny(denyPlayerId);
+                            break;
+                        case "haggle_block": // Valid Command or (DE)?
+                            if (!ShopSystem.utils.isGM(msg)) return;
+                            var shop = ShopSystem.state.activeShop;
+                            if (shop?.haggle) {
+                                shop.haggle.remaining_attempts = 0;
+                                ShopSystem.utils.sendGMMessage(`🚫 Haggling is now blocked for ${shop.name}.`);
+                                // Update the handout's gmnotes
+                                const shopHandout = getObj("handout", shop.id);
+                                if (shopHandout) {
+                                    shopHandout.set("gmnotes", JSON.stringify(shop));
+                                }
+                                for (const playerId in state.ShopSystem.playerBaskets) {
+                                    ShopSystem.basket.viewBasket(playerId);
+                                }
+                            }
                             break;
                         // [TAG: HAGGLE_APPLY_ROUTING] Updated routing for apply command
                         case "haggle_apply":
@@ -2894,9 +2893,8 @@ const ShopSystem = {
                                  break;
                              }
                              // Pass both adjustment strings to the handler function
-                             ShopSystem.basket.handleHaggleApply(applyPlayerId, buyAdjustmentCopperStr, sellAdjustmentCopperStr);
+                            ShopSystem.basket.handleHaggleApply(applyPlayerId, buyAdjustmentCopperStr, sellAdjustmentCopperStr);
                             break;
-                        // Add cases for haggle_check, haggle_roll, haggle_apply etc. later
                         default:
                             // Default action is to view basket if subcommand is unrecognized or missing
                             ShopSystem.basket.viewBasket(playerID);
@@ -2955,7 +2953,7 @@ const ShopSystem = {
                             break;
                     }
                     break;
-                    
+
                 default:
                     // If a shop is already open, or if this is the default !shop command, show the menu
                     if (command === "" || ShopSystem.state.activeShop) {
@@ -3053,6 +3051,10 @@ const ShopSystem = {
                 price_modifiers: {
                     buy: 1.0,
                     sell: 0.5
+                },
+                haggle: {
+                    max_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
+                    remaining_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
                 },
                 special_event: {
                     type: "Bulk Discount",
@@ -3164,7 +3166,7 @@ const ShopSystem = {
                 menu.push("{{Shops=");
                 shops.forEach((shop, index) => {
                     const shopName = shop.get("name").replace(CONFIG.HANDOUT.SHOP_PREFIX, "");
-                    menu.push(`<br>[${index + 1}. ${shopName}](!shop open ${shopName})`);
+                    menu.push(`[${index + 1}. ${shopName}](!shop open ${shopName})<br>`);
                 });
                 menu.push("}}");
             }
@@ -3329,13 +3331,18 @@ const ShopSystem = {
                             shopData.merchant_description ? `{{Merchant Description=${shopData.merchant_description}}}` : "",
                             shopData.location ? `{{Location=${shopData.location}}}` : "",
                             shopData.shop_type ? `{{Type=${shopData.shop_type}}}` : "",
-                            shopData.merchant_type ? `{{Merchant Type=${shopData.merchant_type}}}` : "",
+                            `{{Merchant Type=${shopData.merchant_type}}}`,
+                            // Show Haggle Attempts if available
+                            (shopData.haggle && typeof shopData.haggle.remaining_attempts !== 'undefined'
+                                ? `{{Haggle Attempts=${shopData.haggle.remaining_attempts}${typeof shopData.haggle.max_attempts !== 'undefined' ? ' / ' + shopData.haggle.max_attempts : ''}}}`
+                                : ""),
                             `{{Price Modifiers=Buy: ${shopData.price_modifiers?.buy || 1.0}x | Sell: ${shopData.price_modifiers?.sell || 0.5}x}}`,
                             shopData.special_event?.type !== "None" ? `{{Special Event=${shopData.special_event.type}: ${shopData.special_event.details}}}` : "",
                             `{{Inventory Overview=\n${this.STAT_LOG_FormatInventoryView(shopData)}}}`,
                             "{{Shop Management=",
                             "[📋 Stock Management](!shop stock manage) ",
                             "[✏️ Update Info](!shop update_info) ",
+                            "[🔄 Reset Haggles](!shop haggle_reset) ",
                             "[🎲 Random Stock](!shop stock random) ",
                             "[👥 Display to Players](!shop display_to_players)",
                             "}}",
@@ -3367,59 +3374,58 @@ const ShopSystem = {
 
         // [TAG: SHOP_CHARACTER_SELECTION]
         SHPDIS_MD_ShowCharacterSelect: function(playerID, showToAll = false) {
-            if (showToAll) {
-                // Get all players
-                let players = findObjs({
-                    _type: 'player'
+            ShopSystem.utils.log(`SHPDIS_MD_ShowCharacterSelect called for playerID: ${playerID}, showToAll: ${showToAll}`, 'debug');
+
+            const processPlayer = (pId, pName) => {
+                let characters = findObjs({ _type: 'character' }).filter(char => {
+                    const controlledBy = char.get('controlledby');
+                    return controlledBy && (controlledBy === 'all' || controlledBy.split(',').includes(pId));
                 });
-                
-                // Show menu to each player directly
-                players.forEach(player => {
-                    let pid = player.get('_id');
-                    // Filter characters specifically controlled by this player ID
-                    // This handles comma-separated IDs and 'all'
-                    let characters = findObjs({ _type: 'character' }).filter(char => {
-                        const controlledBy = char.get('controlledby');
-                        return controlledBy && (controlledBy === 'all' || controlledBy.split(',').includes(pid));
+
+                if (!characters.length) {
+                    ShopSystem.utils.chat("❌ No characters available to select.", pId);
+                    return;
+                }
+
+                let characterEntries = []; // Store each character's full entry
+                let charactersProcessed = 0;
+                const totalCharacters = characters.length;
+
+                if (totalCharacters === 0) { // Should be caught by !characters.length but as a safeguard
+                    let finalMenu = `&{template:default} {{name=Select Character}} {{Info=No characters for ${pName}}}`;
+                    ShopSystem.utils.chat(finalMenu, pId);
+                    return;
+                }
+
+                characters.forEach(char => {
+                    const charId = char.get('_id');
+                    const charName = char.get('name') || 'Unnamed Character';
+
+                    ShopSystem.utils.getCharacterTokenImgTagAsync(charId, charName, 'width: 25px; height: 25px; vertical-align: middle; margin-right: 5px; border-radius: 3px;', (imgTag) => {
+                        // Create a new template field for each character, combining image, name, and button
+                        characterEntries.push(`{{${charName}=${imgTag} [Select](!shop select_character ${charId})}}`);
+                        charactersProcessed++;
+                        if (charactersProcessed === totalCharacters) {
+                            let finalMenu = `&{template:default} {{name=Select Character}}` + characterEntries.join('');
+                            ShopSystem.utils.chat(finalMenu, pId);
+                        }
                     });
-
-                    if (characters.length > 0) {
-                        // Build menu directly here
-                        let content = `&{template:default} {{name=Select Character}}`;
-                        characters.forEach(char => {
-                            content += ` {{${char.get('name')}=[Select](!shop select_character ${char.get('_id')})}}`;
-                        });
-                        
-                        // Use utils.chat to whisper directly to the player 'pid'
-                        ShopSystem.utils.chat(content, pid); 
-                    } else {
-                        // Whisper error directly to the player 'pid'
-                        ShopSystem.utils.chat("❌ No characters available to select.", pid); 
-                    }
                 });
-                return; // Stop execution after handling showToAll
+            };
+
+            if (showToAll) {
+                let players = findObjs({ _type: 'player' });
+                players.forEach(player => {
+                    processPlayer(player.get('_id'), player.get('_displayname'));
+                });
+            } else {
+                const player = getObj('player', playerID);
+                if (player) {
+                    processPlayer(playerID, player.get('_displayname'));
+                } else {
+                    ShopSystem.utils.log(`Player not found for ID: ${playerID} in SHPDIS_MD_ShowCharacterSelect`, 'error');
+                }
             }
-
-            // --- This part handles calls for a single player (e.g., !shop switch_character) ---
-            // Filter characters specifically controlled by this player ID
-            let characters = findObjs({ _type: 'character' }).filter(char => {
-                const controlledBy = char.get('controlledby');
-                return controlledBy && (controlledBy === 'all' || controlledBy.split(',').includes(playerID));
-            });
-
-            if (!characters.length) {
-                ShopSystem.utils.chat("❌ No characters available to select.", playerID);
-                return;
-            }
-
-            // Build the character selection menu
-            let content = `&{template:default} {{name=Select Character}}`;
-            characters.forEach(char => {
-                content += ` {{${char.get('name')}=[Select](!shop select_character ${char.get('_id')})}}`;
-            });
-            
-            // Use utils.chat to whisper directly to the player
-            ShopSystem.utils.chat(content, playerID); 
         },
 
         // [TAG: CD_ADVANCED_SETUP_MENU] // New feature
@@ -3534,6 +3540,7 @@ const ShopSystem = {
                 `• Merchant Name: [Set](!shop set_merchant ${encodedName} ?{Merchant Name|${current.merchant_name}})`,
                 `<br>• Shop Type: [Set](!shop set_type ${encodedName} ?{Shop Type|${shopTypeOptions}})`,
                 `<br>• Location: [Set](!shop set_location ${encodedName} ?{Location|${locationOptions}})`,
+                `<br>• Haggle Attempts: [Set](!shop set_haggle_attempts ${encodedName} ?{Max Haggle Attempts|${current.haggle?.max_attempts ?? CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS}})`,
                 "}}",
                 "{{Merchant Details=",
                 `• Personality: [Set](!shop set_personality ${encodedName} ?{Merchant Personality|${merchantTypeOptions}})`,
@@ -3645,6 +3652,17 @@ const ShopSystem = {
                 case "description":
                     pending.description = value || defaults.DESCRIPTION;
                     break;
+                case "haggle_attempts":
+                    // Update max_attempts and reset remaining_attempts
+                    if (!pending.haggle) {
+                        pending.haggle = {
+                            max_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
+                            remaining_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
+                        };
+                    }
+                    pending.haggle.max_attempts = parseInt(value) || CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS;
+                    pending.haggle.remaining_attempts = pending.haggle.max_attempts;
+                    break;
                 default:
                     ShopSystem.utils.chat(`⚠️ Unknown parameter: ${param}`, playerID);
                     break;
@@ -3702,6 +3720,10 @@ const ShopSystem = {
                 special_event: {
                     type: pendingSetup.special_event || "None",
                     details: pendingSetup.special_event_details || "None"
+                },
+                haggle: pendingSetup.haggle || {
+                    max_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
+                    remaining_attempts: CONFIG.HAGGLE.DEFAULT_STORE_ATTEMPTS,
                 }
             };
             
@@ -5925,24 +5947,26 @@ const ShopSystem = {
                     "{{Actions=",
                     ...(isGM ? [
                         // GM Add Actions (add directly to stock) - Always available for GMs
-                        `[➕ Add 1 to Stock](!shop stock add_item ${itemId} 1)`,
-                        `[➕ Add 5 to Stock](!shop stock add_item ${itemId} 5)`,
-                        `[➕ Add Custom to Stock](!shop stock add_item ${itemId} ?{Quantity|1})`,
-                        `[💰&➕ Set Price & Add Custom](!shop stock add_item_custom_price ${itemId} ?{Price GP|${(ShopSystem.utils.toCopper(item.price) / CONFIG.CURRENCY.COPPER_PER_GOLD).toFixed(2)}} ?{Quantity|1})`
-                    ] : (
+                            `[➕ Add 1 to Stock](!shop stock add_item ${itemId} 1)`,
+                            `[➕ Add 5 to Stock](!shop stock add_item ${itemId} 5)`,
+                            `[➕ Add Custom to Stock](!shop stock add_item ${itemId} ?{Quantity|1})`,
+                            `[💰&➕ Set Price & Add Custom](!shop stock add_item_custom_price ${itemId} ?{Price GP|${(ShopSystem.utils.toCopper(item.price) / CONFIG.CURRENCY.COPPER_PER_GOLD).toFixed(2)}} ?{Quantity|1})`
+                        ] : (
                         // Player Add Actions (add to basket) - Only show if in stock
                         currentShopQuantity > 0 ? [
                             `[🛒 Add 1 to Basket](!shop basket add ${itemId} 1)`,
                             `[🛒 Add 5 to Basket](!shop basket add ${itemId} 5)`,
                             `[🛒 Add Custom to Basket](!shop basket add ${itemId} ?{Quantity|1})`
                         ] : [
-                            "-- Out of Stock --" // Message when out of stock
+                            '<span style="color:#FF3333;font-weight:bold;">-- Out of Stock --</span>' // Message when out of stock, now in red
                         ]
                     )),
                     "}}", // Close Actions section
                     "{{Navigation=",
                     // Use !shop browse all for players, !shop stock add [category] for GMs
-                    isGM ? `[🔙 Back to Add Items (${category})](!shop stock add ${category})` : `[🔙 Back to Browse All](!shop browse all)`,
+                    isGM
+                        ? `[🔙 Back to Add Items (${category})](!shop stock add ${category})`
+                        : `[🧺 Back to Basket](!shop basket view) [🔙 Back to Browse All](!shop browse all)`,
                     "}}",
                     // Update note based on viewer
                     isGM ? "{{Note=Select an action to add this item to the shop stock.}}" : "{{Note=Select an action to add this item to your basket.}}"
@@ -6141,18 +6165,34 @@ const ShopSystem = {
                 // Store this as the active character for selling now
                 state.ShopSystem.activeCharacters[playerID] = charId;
                 this.SELL_LOG_DisplayInventory(playerID, charId);
+            // ... (if (controlledCharacters.length === 0) and else if (controlledCharacters.length === 1) blocks remain the same) ...
             } else {
                 // Multiple characters, show selection menu
-                let menu = `&{template:default} {{name=Select Character For Selling}}`; // Updated title
-                menu += `{{Characters=`;
+                ShopSystem.utils.log(`Multiple characters found for ${playerID} to sell from. Building selection menu.`, 'debug');
+                let menuPreamble = `&{template:default} {{name=Select Character For Selling}}`;
+                let characterEntries = []; // Store each character's full entry
+                let charactersProcessed = 0;
+                const totalCharacters = controlledCharacters.length;
+
+                if (totalCharacters === 0) {
+                    ShopSystem.utils.chat(menuPreamble + "{{Info=No characters to sell from.}}", playerID);
+                    return;
+                }
+
                 controlledCharacters.forEach(char => {
-                    // The command should still just display the inventory, but also set the active char
-                    // We can repurpose the 'sell from' command slightly conceptually.
-                    // It will now also set the active character if selected via this menu.
-                    menu += `[${char.get('name')}](!shop sell from ${char.id}) `; 
+                    const charId = char.get('_id');
+                    const charName = char.get('name') || 'Unnamed Character';
+
+                    ShopSystem.utils.getCharacterTokenImgTagAsync(charId, charName, 'width: 25px; height: 25px; vertical-align: middle; margin-right: 5px; border-radius: 3px;', (imgTag) => {
+                        characterEntries.push(`{{${charName}=${imgTag} [Sell From This Character](!shop sell from ${charId})}}`);
+                        charactersProcessed++;
+
+                        if (charactersProcessed === totalCharacters) {
+                            let finalMenu = menuPreamble + characterEntries.join('');
+                            ShopSystem.utils.chat(finalMenu, playerID);
+                        }
+                    });
                 });
-                menu += `}}`;
-                ShopSystem.utils.chat(menu, playerID);
             }
         },
         
@@ -6944,12 +6984,18 @@ const ShopSystem = {
                 menu += `{{Discount=${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(discountAmount))} (${discountPercent}%)}}` +
                         `{{Final Total=${ShopSystem.utils.formatCurrency(discountedPrice)}}}`;
             }
+
+            // Show Haggle button only if shop has attempts left
+            const shop = ShopSystem.state.activeShop;
+            const haggleBtn = (shop && shop.haggle && shop.haggle.remaining_attempts > 0)
+                ? `[🔊 Haggle](!shop basket haggle) `
+                : ''; // No button if attempts are 0
             
             // Modify the Actions section to include merge when available
             menu += `{{Actions=` +
                     `[💰 Checkout](!shop basket checkout) ` +
                     `[🗑️ Clear Basket](!shop basket clear) ` +
-                    `[🔊 Haggle](!shop basket haggle) ` + // <-- Corrected command
+                    haggleBtn +
                     (canMerge ? `[🔄 Merge Baskets](!shop basket merge) ` : '') +
                     `[🏪 Back to Shop](!shop)}}`;
             
@@ -7008,6 +7054,13 @@ const ShopSystem = {
             // [TAG: CD_BASKET_LAST_MODIFIED_TRACKING] Clear last modified on basket clear
             if (state.ShopSystem.lastModifiedBasketItem) {
                 delete state.ShopSystem.lastModifiedBasketItem[playerId];
+            }
+            // Redisplay shop menu if active
+            if (ShopSystem.state.activeShop) {
+                 // Need msg object to call ShowShopMenu, attempt to reconstruct minimally
+                 const player = getObj('player', playerId);
+                 const mockMsg = { playerid: playerId, who: player?.get('_displayname') || 'Player' };
+                 ShopSystem.shop.SHPDIS_MD_ShowShopMenu(ShopSystem.state.activeShop.name, playerId, mockMsg, false);
             }
         },
 
@@ -7120,27 +7173,38 @@ const ShopSystem = {
 
             // Display Buy/Sell sections only if items exist
             if (buyBasket.length > 0) {
-                 message += `{{Items Buying=💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(finalBuyCopper))}}}`;
-                 // Show Buy Adjustment if applicable
-                 if (buyAdjustmentCopper !== 0) {
-                     const buyAdjFormatted = ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(Math.abs(buyAdjustmentCopper)));
-                     const buyAdjLabel = buyAdjustmentCopper < 0 ? "Discount" : "Markup";
-                     const buyPercentLabel = originalBuyForDisplay > 0 ? ` (${Math.round(Math.abs(buyAdjustmentCopper / originalBuyForDisplay) * 100)}%)` : '';
-                     message += `{{Buy Haggle=${buyAdjLabel}: ${buyAdjFormatted}${buyPercentLabel}}}`;
-                 }
-            }
+                // Show the ORIGINAL buy total before haggle
+                message += `{{Items Buying (Subtotal)=💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(originalBuyForDisplay))}}}`; 
+                // Show Buy Adjustment if applicable
+                if (buyAdjustmentCopper !== 0) {
+                    const buyAdjFormatted = ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(Math.abs(buyAdjustmentCopper)));
+                    const buyAdjLabel = buyAdjustmentCopper < 0 ? "Discount" : "Markup";
+                    const buyPercentLabel = originalBuyForDisplay > 0 ? ` (${Math.round(Math.abs(buyAdjustmentCopper / originalBuyForDisplay) * 100)}%)` : '';
+                    message += `{{Buy Haggle=${buyAdjLabel}: ${buyAdjFormatted}${buyPercentLabel}}}`;
+                    // Optionally, show the price after discount if a discount was applied
+                    if (buyAdjustmentCopper < 0) {
+                        message += `{{Price After Haggle=💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(finalBuyCopper))}}}`;
+                    }
+                }
+           }
             if (sellBasket.length > 0) {
-                 message += `{{Items Selling=💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(finalSellCopper))}}}`;
+                 // Show the ORIGINAL sell total before haggle
+                 message += `{{Items Selling (Subtotal)=💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(originalSellForDisplay))}}}`;
                  // Show Sell Adjustment if applicable
                  if (sellAdjustmentCopper !== 0) {
                      const sellAdjFormatted = ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(Math.abs(sellAdjustmentCopper)));
                      const sellAdjLabel = sellAdjustmentCopper > 0 ? "Bonus" : "Penalty";
                      const sellPercentLabel = originalSellForDisplay > 0 ? ` (${Math.round(Math.abs(sellAdjustmentCopper / originalSellForDisplay) * 100)}%)` : '';
                      message += `{{Sell Haggle=${sellAdjLabel}: ${sellAdjFormatted}${sellPercentLabel}}}`;
+                     // Optionally, show the value after bonus/penalty if an adjustment was applied
+                     if (sellAdjustmentCopper !== 0) { // Could be >0 for bonus or <0 for penalty
+                        message += `{{Value After Haggle=💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(finalSellCopper))}}}`;
+                     }
                  }
             }
 
-             message += `{{Net Transaction=💰${transactionLabel}: ${ShopSystem.utils.formatCurrency(netTransactionPrice)}}}`;
+            // Net Transaction should reflect the FINAL costs/gains
+            message += `{{Net Transaction=${transactionLabel}: 💰${ShopSystem.utils.formatCurrency(ShopSystem.utils.fromCopper(Math.abs(netTransactionCopper)))}}}`;
             message += `{{Current Funds=💰${ShopSystem.utils.formatCurrency(charCurrency)}}}`;
              // Calculate final funds after transaction
              const finalFundsCopper = charCopper + netTransactionCopper;
@@ -8153,15 +8217,36 @@ const ShopSystem = {
 
              ShopSystem.utils.log(`Haggle Context Determined: Type=${haggleType}, BuyTotal=${buyTotalCopper}, SellTotal=${sellTotalCopper}, Merged=${isMerged}`, 'debug');
 
-
-            // --- Check Haggle State (Attempts, Applied) ---
-            if (!state.ShopSystem.haggleResults) state.ShopSystem.haggleResults = {};
-            if (!state.ShopSystem.haggleResults[playerId]) {
-                state.ShopSystem.haggleResults[playerId] = { attempts: 0, applied: false };
+            // Replace the old haggle check code in initiateHaggle with:
+            const shop = ShopSystem.state.activeShop;
+                
+            // Check if haggling is available
+            if (!shop.haggle || shop.haggle.remaining_attempts <= 0) {
+                ShopSystem.utils.chat('❌ The merchant is no longer interested in haggling.', playerId);
+                if (isMerged) this.viewMergedBasket(playerId);
+                else if (forcedHaggleType === 'sell') this.viewSellBasket(playerId);
+                else this.viewBasket(playerId);
+                return;
             }
 
+            // Deduct one attempt
+            shop.haggle.remaining_attempts--;
+            const shopHandout = getObj("handout", shop.id);
+            if (shopHandout) {
+                shopHandout.set("gmnotes", JSON.stringify(shop));
+            }
+            ShopSystem.utils.log(`Store haggle attempts: ${shop.haggle.remaining_attempts}/${shop.haggle.max_attempts} remaining`, 'debug');
+
+            // Initialize haggle results state if needed
+            if (!state.ShopSystem.haggleResults) state.ShopSystem.haggleResults = {};
+            if (!state.ShopSystem.haggleResults[playerId]) {
+                state.ShopSystem.haggleResults[playerId] = { 
+                    applied: false, 
+                    originalBuyBasketPriceCopper: 0, 
+                    originalSellBasketPriceCopper: 0 
+                };
+            }
             const haggleState = state.ShopSystem.haggleResults[playerId];
-            const maxAttempts = CONFIG.HAGGLE.MAX_ATTEMPTS || 1;
 
             if (haggleState.applied) {
                 ShopSystem.utils.chat('❌ Haggle result already applied for this transaction.', playerId);
@@ -8172,29 +8257,26 @@ const ShopSystem = {
                 return;
             }
 
-            if (haggleState.attempts >= maxAttempts) {
-                ShopSystem.utils.chat(`❌ You have already reached the maximum of ${maxAttempts} haggle attempt(s) for this transaction.`, playerId);
-                 if (isMerged) this.viewMergedBasket(playerId);
+            if (!shop.haggle || shop.haggle.remaining_attempts <= 0) {
+                ShopSystem.utils.chat('❌ The merchant is no longer interested in haggling.', playerId);
+                if (isMerged) this.viewMergedBasket(playerId);
                 else if (forcedHaggleType === 'sell') this.viewSellBasket(playerId);
                 else this.viewBasket(playerId);
                 return;
             }
 
-            haggleState.attempts += 1;
-            ShopSystem.utils.log(`Haggle attempt ${haggleState.attempts}/${maxAttempts} for player ${playerId}`, 'debug');
-
             // --- Store Original Prices & Determined Haggle Type Temporarily ---
-            haggleState.tempOriginalBuyCopper = buyTotalCopper;
-            haggleState.tempOriginalSellCopper = sellTotalCopper;
-            haggleState.tempHaggleType = haggleType; // Store the determined type
-
+            // These are used by handleHaggleRoll and handleHaggleApply if needed
+            haggleState.originalBuyBasketPriceCopper = buyTotalCopper; 
+            haggleState.originalSellBasketPriceCopper = sellTotalCopper;
+            haggleState.tempHaggleType = haggleType; // Store the determined type for handleHaggleRoll
 
             // --- Show GM Prompt ---
             const playerName = getObj('player', playerId)?.get('_displayname') || 'Unknown Player';
             const allowCmd = `!shop basket haggle_show_skills ${playerId}`;
             const denyCmd = `!shop basket haggle_deny ${playerId}`;
 
-            const gmMenu = `&{template:default} {{name=Haggle Attempt (${haggleState.attempts}/${maxAttempts})}}` +
+            const gmMenu = `&{template:default} {{name=Haggle Attempt (${shop.haggle.max_attempts - shop.haggle.remaining_attempts + 1}/${shop.haggle.max_attempts})}}` +
                            `{{Player=${playerName} (ID: ${playerId})}}` +
                            `{{Basket=${basketTotalFormatted}}}` + // Use the formatted total
                            `{{Haggle Focus=${haggleType}}}` + // Show the haggle focus
@@ -8208,23 +8290,29 @@ const ShopSystem = {
         // [TAG: HAGGLE_SHOW_SKILLS] Display haggle skill options to the player
         showHaggleSkillsMenu(playerId) {
             ShopSystem.utils.log(`showHaggleSkillsMenu called for playerId: ${playerId}`, 'debug'); 
-            // ADD DEBUG LOG HERE:
             ShopSystem.utils.log(`Inspecting basket state for ${playerId}: ${JSON.stringify(state.ShopSystem.playerBaskets?.[playerId])}`, 'debug');
 
-            // Existing checks and logic follow...
             if (!ShopSystem.state.activeShop) {
-                 ShopSystem.utils.chat('❌ No active shop available for haggling.', playerId);
-                 return;
-             }
-             // Check if haggle already applied
+                ShopSystem.utils.chat('❌ No active shop available for haggling.', playerId);
+                return;
+            }
+            // Check if haggle already applied
             if (state.ShopSystem.haggleResults && state.ShopSystem.haggleResults[playerId]?.applied) {
-                 ShopSystem.utils.chat('❌ Haggle result already applied for this transaction.', playerId);
-                 this.viewBasket(playerId); // Show basket with applied haggle
-                 return;
+                ShopSystem.utils.chat('❌ Haggle result already applied for this transaction.', playerId);
+                this.viewBasket(playerId); // Show basket with applied haggle
+                return;
             }
             // TODO: Add check for MAX_ATTEMPTS
 
+            // Merchant DC calculation
             const shop = ShopSystem.state.activeShop;
+            const merchantType = shop.merchant_type || CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE;
+            const merchantConfig = CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === merchantType) ||
+                                CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE);
+            const dcMod = merchantConfig?.dcMod || 0;
+            const baseDC = CONFIG.HAGGLE.BASE_DC || 15;
+            let finalDC = baseDC + dcMod;
+
             // Use skills from CONFIG, ensuring "Sleight of Hand" is treated case-insensitively if present
             const skills = CONFIG.HAGGLE.SKILLS.map(s => s.toLowerCase()) || ["persuasion", "deception", "intimidation"];
             const skillEmojis = {
@@ -8236,38 +8324,56 @@ const ShopSystem = {
 
             let skillButtons = skills.map(skill => {
                 // Capitalize skill name for display (handle multi-word like Sleight of Hand)
-                 const skillName = skill.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                const skillName = skill.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                 const emoji = skillEmojis[skill] || "🎲"; // Use lowercase skill for emoji lookup
-                const command = `!shop basket haggle_check ${skillName}`; // Pass capitalized skill name
+                const command = `!shop basket haggle_check ${playerId} ${skillName} ${finalDC}`; // Pass capitalized skill name
                 const isSleightOfHand = skill === 'sleight of hand';
                 const label = `${emoji} ${skillName}${isSleightOfHand ? ' (DE)' : ''}`; // Add (DE) for Sleight of Hand
                 return `[${label}](${command})`;
             }).join(' | ');
 
+            // Before building the menu:
+            const haggleType = state.ShopSystem.haggleResults?.[playerId]?.tempHaggleType;
+            const isSellFlow = (typeof haggleType !== 'undefined') ? (haggleType === 'sell') : false;
+            const backToBasketCmd = isSellFlow ? '!shop sell view' : '!shop basket view';
+
+            // Then in your menu string:
             const menu = `&{template:default} {{name=Attempt to Haggle}}` +
-                         `{{Shop=${shop.name || "Shop"} - ${shop.merchant_name || "Merchant"}}}` +
-                         `{{Instructions=Select a skill to attempt to haggle for a better price:}}` +
-                         `{{Skills=${skillButtons}}}` +
-                         `{{Note=Success is not guaranteed! (Sleight of Hand DE: Not Implemented)}}` +
-                         `{{Actions=[↩️ Back to Basket](!shop basket view)}}`;
+                `{{Shop=${shop.name || "Shop"} - ${shop.merchant_name || "Merchant"}}}` +
+                `{{Instructions=Select a skill to attempt to haggle for a better price:}}` +
+                `{{Skills=${skillButtons}}}` +
+                `{{Note=Success is not guaranteed! (Sleight of Hand DE: Not Implemented)}}` +
+                `{{Actions=[↩️ Back to Basket](${backToBasketCmd})}}`;
 
             ShopSystem.utils.chat(menu, playerId); // Whisper to the player
         },
 
-         showHaggleMenu(playerId) {
-             ShopSystem.utils.chat('Haggle function (DE) - Needs Implementation.', playerId);
-        },
-
         // [TAG: HAGGLE_HANDLE_CHECK] GM receives player's skill choice and sets up roll expectation
-        handleHaggleCheck(playerId, skillType) {
-            // REMOVED: Merge check - Haggling is now allowed when merged.
+        handleHaggleCheck(playerId, skillType, dc) {
+            if (!state.ShopSystem.haggleResults) state.ShopSystem.haggleResults = {};
+            if (!state.ShopSystem.haggleResults[playerId]) state.ShopSystem.haggleResults[playerId] = {};
+
+            // Merchant DC calculation
+            const shop = ShopSystem.state.activeShop;
+            const merchantType = shop.merchant_type || CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE;
+            const merchantConfig = CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === merchantType) ||
+                                CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE);
+            const dcMod = merchantConfig?.dcMod || 0;
+            const baseDC = CONFIG.HAGGLE.BASE_DC || 15;
+            const calculatedDC = baseDC + dcMod;
+
+            // If the DC passed in matches the calculated value, recalculate in case merchant type changed
+            if (!dc || parseInt(dc, 10) === baseDC) {
+                state.ShopSystem.haggleResults[playerId].dc = calculatedDC;
+            } else {
+                state.ShopSystem.haggleResults[playerId].dc = parseInt(dc, 10);
+            }
 
             // Check if haggle already applied
             if (state.ShopSystem.haggleResults && state.ShopSystem.haggleResults[playerId]?.applied) {
-                 ShopSystem.utils.sendGMMessage(`Haggle attempt by Player ID ${playerId} ignored: Haggle already applied.`);
-                 // Maybe whisper to player too?
-                 ShopSystem.utils.chat('❌ Haggle result already applied for this transaction.', playerId);
-                 return;
+                ShopSystem.utils.sendGMMessage(`Haggle attempt by Player ID ${playerId} ignored: Haggle already applied.`);
+                ShopSystem.utils.chat('❌ Haggle result already applied for this transaction.', playerId);
+                return;
             }
             // TODO: Add check for MAX_ATTEMPTS
 
@@ -8283,16 +8389,15 @@ const ShopSystem = {
 
             if (!ShopSystem.state.activeShop) {
                 ShopSystem.utils.sendGMMessage(`❌ Error: No active shop for ${playerName}'s haggle check.`);
-                 ShopSystem.utils.chat('❌ Error: No active shop to haggle with!', playerId);
+                ShopSystem.utils.chat('❌ Error: No active shop to haggle with!', playerId);
                 return;
             }
-            const shop = ShopSystem.state.activeShop;
-            const merchantType = shop.merchant_type || CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE;
-            const merchantConfig = CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === merchantType) ||
-                                   CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE);
-            const dcMod = merchantConfig?.dcMod || 0;
-            const baseDC = CONFIG.HAGGLE.BASE_DC || 15;
-            const finalDC = baseDC + dcMod;
+
+            // Use the DC from state if set, otherwise calculate as before
+            let finalDC = state.ShopSystem.haggleResults?.[playerId]?.dc;
+            if (typeof finalDC === 'undefined' || finalDC === null) {
+                finalDC = calculatedDC;
+            }
 
             const skillEmojis = {
                 Persuasion: "💬", Deception: "🎭", Intimidation: "😠", "Sleight of Hand": "🎯"
@@ -8301,19 +8406,19 @@ const ShopSystem = {
 
             // Prompt GM for roll handling
             const gmMenu = `&{template:default} {{name=${emoji} ${skillType} Check (DC ${finalDC})}}` +
-                           `{{Player=${playerName} (ID: ${playerId})}}` +
-                           `{{Merchant Type=${merchantType} (DC Mod: ${dcMod > 0 ? '+' + dcMod : dcMod})}}`+
-                           `{{Instructions=Select how to handle the roll:}}` +
-                           `{{Roll Options=` +
-                           `[Normal](!shop basket haggle_roll ${playerId} ${skillType} normal ${finalDC}) | ` +
-                           `[Advantage](!shop basket haggle_roll ${playerId} ${skillType} advantage ${finalDC}) | ` +
-                           `[Disadvantage](!shop basket haggle_roll ${playerId} ${skillType} disadvantage ${finalDC})` +
-                           `}}` +
-                            `{{Manual/Edit=` +
-                           `[Accept Player Roll](!shop basket haggle_accept ${playerId} ${skillType} ${finalDC}) | `+ // Kept Accept Player Roll
-                           `[✏️ Edit DC](!shop basket haggle_check ${playerId} ${skillType} ?{New DC|${finalDC}})` +
-                           `}}`+
-                           `{{Actions=[❌ Deny Attempt](!shop basket haggle_deny ${playerId})}}`;
+                `{{Player=${playerName} (ID: ${playerId})}}` +
+                `{{Merchant Type=${merchantType} (DC Mod: ${dcMod > 0 ? '+' + dcMod : dcMod})}}` +
+                `{{Instructions=Select how to handle the roll:}}` +
+                `{{Roll Options=` +
+                `[Normal](!shop basket haggle_roll ${playerId} ${skillType} normal ${finalDC}) | ` +
+                `[Advantage](!shop basket haggle_roll ${playerId} ${skillType} advantage ${finalDC}) | ` +
+                `[Disadvantage](!shop basket haggle_roll ${playerId} ${skillType} disadvantage ${finalDC})` +
+                `}}` +
+                `{{Manual/Edit=` +
+                `[Accept Player Roll](!shop basket haggle_manual ${playerId} ${skillType} ${finalDC} ?{Enter Roll Result|10}) | ` +
+                `[✏️ Edit DC](!shop basket haggle_check ${playerId} ${skillType} ?{New DC|${finalDC}})` +
+                `}}` +
+                `{{Actions=[❌ Deny Attempt](!shop basket haggle_deny ${playerId})}}`;
 
             ShopSystem.utils.sendGMMessage(gmMenu);
 
@@ -8365,9 +8470,15 @@ const ShopSystem = {
                                      CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE; // Default personality
             const denialMessage = merchantConfig?.critFailure || "The merchant refuses to negotiate on the price."; // Use critFailure for flavor
 
+            // Before building the playerMessage:
+            const haggleType = state.ShopSystem.haggleResults?.[playerId]?.tempHaggleType; // or however you track it
+            const isSellFlow = (typeof haggleType !== 'undefined') ? (haggleType === 'sell') : false;
+            const backToBasketCmd = isSellFlow ? '!shop sell view' : '!shop basket view';
+
+            // Then in your playerMessage string:
             const playerMessage = `&{template:default} {{name=Haggle Attempt Denied}}` +
-                                  `{{Result=${denialMessage}}}` +
-                                  `{{Actions=[↩️ View Basket](!shop basket view)}}`;
+                `{{Result=${denialMessage}}}` +
+                `{{Actions=[↩️ View Basket](${backToBasketCmd})}}`;
 
             ShopSystem.utils.chat(playerMessage, playerId);
 
@@ -8386,43 +8497,40 @@ const ShopSystem = {
              }
         },
 
-        // [TAG: HAGGLE_HANDLE_ROLL] // Updated for Buy/Sell Context
         handleHaggleRoll(playerId, skillType, advantage, dc) {
             const playerName = getObj('player', playerId)?.get('_displayname') || 'Unknown Player';
             const finalDC = parseInt(dc); // Ensure DC is a number
 
-            // --- Retrieve temp prices and type stored by initiateHaggle ---
+            // --- Retrieve original prices and haggle type stored by initiateHaggle ---
             const haggleState = state.ShopSystem.haggleResults?.[playerId];
-            if (!haggleState || haggleState.tempHaggleType === undefined) {
-                ShopSystem.utils.log(`Error: Could not retrieve temporary haggle state for player ${playerId} in handleHaggleRoll.`, 'error');
-                ShopSystem.utils.sendGMMessage(`❌ Error initiating haggle roll for ${playerName}. Haggle state missing.`);
+            
+            // Ensure haggleState and its necessary properties exist
+            if (!haggleState || 
+                haggleState.originalBuyBasketPriceCopper === undefined || 
+                haggleState.originalSellBasketPriceCopper === undefined || 
+                haggleState.tempHaggleType === undefined) {
+                ShopSystem.utils.log(`Error: Could not retrieve complete haggle state for player ${playerId} in handleHaggleRoll. HaggleState: ${JSON.stringify(haggleState)}`, 'error');
+                ShopSystem.utils.sendGMMessage(`❌ Error initiating haggle roll for ${playerName}. Haggle state missing critical info.`);
                 return;
             }
-            const originalBuyCopperPrice = haggleState.tempOriginalBuyCopper;
-            const originalSellCopperPrice = haggleState.tempOriginalSellCopper;
-            const haggleType = haggleState.tempHaggleType;
 
-            // Clear temporary values now that we're setting the pending roll
-            delete haggleState.tempOriginalBuyCopper;
-            delete haggleState.tempOriginalSellCopper;
-            delete haggleState.tempHaggleType;
-            // --- End Retrieval ---
+            const originalBuyCopperPrice = haggleState.originalBuyBasketPriceCopper;
+            const originalSellCopperPrice = haggleState.originalSellBasketPriceCopper;
+            const haggleTypeToStore = haggleState.tempHaggleType;
 
-
-            // Store pending roll information including both original prices and haggle type
+            // Store pending roll information
             if (!state.ShopSystem.pendingHaggleRolls) {
                 state.ShopSystem.pendingHaggleRolls = {};
             }
             state.ShopSystem.pendingHaggleRolls[playerId] = {
-                skillType,
+                skillType: skillType, 
                 dc: finalDC,
-                advantage,
-                haggleType: haggleType, // Store 'buy' or 'sell'
+                advantage: advantage, 
+                haggleType: haggleTypeToStore, // Uses the correctly scoped variable
                 originalBuyBasketPriceCopper: originalBuyCopperPrice,
                 originalSellBasketPriceCopper: originalSellCopperPrice
             };
-             ShopSystem.utils.log(`Stored pending haggle roll: ${JSON.stringify(state.ShopSystem.pendingHaggleRolls[playerId])}`, 'debug');
-
+            ShopSystem.utils.log(`Stored pending haggle roll: ${JSON.stringify(state.ShopSystem.pendingHaggleRolls[playerId])}`, 'debug');
 
             // --- Notify player to roll (remains the same) ---
             let rollInstructions = '';
@@ -8447,7 +8555,7 @@ const ShopSystem = {
                               `{{Player=${playerName}}}` +
                               `{{Action=Instructed to roll ${skillType} (${advantage}) vs DC ${finalDC}}}`+
                                // Clarify which value the haggle type is based on
-                              `{{Haggle Type=${haggleType}}}`;
+                              `{{Haggle Type=${haggleTypeToStore}}}`; // CORRECTED TO USE haggleTypeToStore
 
             ShopSystem.utils.sendGMMessage(gmMessage);
         },
@@ -8455,6 +8563,7 @@ const ShopSystem = {
         // [TAG: HAGGLE_HANDLE_ROLL_RESULT] // Updated for Buy/Sell Context
         handleHaggleRollResult(finalRollValue, playerId, isNat1, isNat20) {
             const pending = state.ShopSystem.pendingHaggleRolls?.[playerId];
+            ShopSystem.utils.log(`DEBUG handleHaggleRollResult: Pending object = ${JSON.stringify(pending)}`, 'debug'); // ADD THIS LINE
             if (!pending) {
                 ShopSystem.utils.log(`Received haggle roll result for ${playerId}, but no pending haggle found. Ignoring.`, 'debug');
                 return;
@@ -8464,6 +8573,7 @@ const ShopSystem = {
             // Destructure all necessary values from the pending state
             const { skillType, dc, haggleType, originalBuyBasketPriceCopper, originalSellBasketPriceCopper } = pending;
             const advantageThreshold = CONFIG.HAGGLE.ADVANTAGE_THRESHOLD || 5;
+            ShopSystem.utils.log(`DEBUG handleHaggleRollResult pending values: originalBuyBasketPriceCopper=${originalBuyBasketPriceCopper} (type: ${typeof originalBuyBasketPriceCopper}), originalSellBasketPriceCopper=${originalSellBasketPriceCopper} (type: ${typeof originalSellBasketPriceCopper}), haggleType=${haggleType}`, 'debug');
             const maxAdjustment = CONFIG.PRICING.HAGGLE_MAX_ADJUSTMENT || 0.2; // Max adjustment (e.g., 20%)
 
             ShopSystem.utils.log(`Processing haggle result for ${playerName}: Roll=${finalRollValue}, DC=${dc}, Type=${haggleType}, BuyOrig=${originalBuyBasketPriceCopper}, SellOrig=${originalSellBasketPriceCopper}`, 'debug');
@@ -8566,8 +8676,23 @@ const ShopSystem = {
                  gmResultMessage += `{{Sell Value Adjustment=${sellAdjustmentLabel}${sellAdjustmentPercentLabel}}}`;
              }
 
-            // Pass BOTH adjustments to the apply command, they will be stored together
-            gmResultMessage += `{{Actions=[✅ Apply Adjustments](!shop basket haggle_apply ${playerId} ${buyAdjustmentCopper} ${sellAdjustmentCopper}) | [❌ Ignore/Deny](!shop basket haggle_deny ${playerId})}}`;
+            // Determine GM actions based on success level
+            if (successLevel === 'failure' || successLevel === 'crit_failure') {
+                // Failure or Crit Failure
+                const shopId = ShopSystem.state.activeShop?.id || 'UNKNOWN_SHOP';
+                const blockCmd = `!shop haggle_block`;
+                const sendToBasketCmd = `!shop basket haggle_deny ${playerId}`; // This sends player to basket, allows retry if attempts left & not blocked.
+
+                const isSellFlow = (typeof haggleType !== 'undefined') ? (haggleType === 'sell') : false;
+                const backToBasketCmd = `!shop basket send_player_to_basket ${playerId} ${isSellFlow ? 'sell' : 'buy'}`;
+                
+                gmResultMessage += `{{Actions=[🚫 Block Haggling](${blockCmd}) | [↩️ Send to Basket](${backToBasketCmd})}}`;
+
+            } else {
+                // Success, Great Success, or Crit Success
+                const manualAdjustCmd = `!shop basket haggle_manual_adjust ${playerId}`; // (DE)
+                gmResultMessage += `{{Actions=[✅ Apply Adjustments](!shop basket haggle_apply ${playerId} ${buyAdjustmentCopper} ${sellAdjustmentCopper}) [✏️ Manual Adjustment (DE)](${manualAdjustCmd}) [❌ Ignore/Deny](!shop basket haggle_deny ${playerId})}}`;
+            }
 
             ShopSystem.utils.sendGMMessage(gmResultMessage);
 
@@ -8632,16 +8757,12 @@ const ShopSystem = {
                 state.ShopSystem.haggleResults = {};
             }
 
-            // Preserve attempt count if it exists
-                const currentAttempts = haggleState?.attempts || 0;
-
             state.ShopSystem.haggleResults[playerId] = {
                 originalBuyBasketPriceCopper: originalBuyCopper, // Store original BUY total
                 originalSellBasketPriceCopper: originalSellCopper, // Store original SELL total
                 buyAdjustmentCopper: buyAdjustmentCopper,         // Store BUY adjustment (+/-)
                 sellAdjustmentCopper: sellAdjustmentCopper,       // Store SELL adjustment (+/-)
                 applied: true,
-                    attempts: currentAttempts // Preserve attempt count
             };
                 ShopSystem.utils.log(`Stored haggle results for ${playerId}: ${JSON.stringify(state.ShopSystem.haggleResults[playerId])}`, 'debug');
 
@@ -8918,85 +9039,89 @@ const ShopSystem = {
         }
     },
     
-    // [TAG: MERGED_13]
-    init: function() {
-        ShopSystem.utils.log("Initializing ShopSystem...", "info");
-        
-        // Load basket state early
-        try {
-            ShopSystem.basket.loadBasketState();
-        } catch (error) {
-            ShopSystem.utils.log(`Error loading basket state on init: ${error.message}`, "error");
-        }
-        
-        // Save a reference to state
-        if (!state.ShopSystem) {
-            state.ShopSystem = {
-                version: CONFIG.version,
-                messageBuffer: [],
-                isImporting: false,
-                activeShop: null,
-                pendingStock: null,
-                playerBaskets: {},
-                sellBaskets: {},
-                    sellBasketCharacter: {}, // Track which character each sell basket belongs to
-                haggleResults: {},
-                pendingHaggleRolls: {},
-                pendingAdvancedSetup: {},
-                shops: []
-            };
-        }
+        // [TAG: MERGED_13]
+        init: function() {
+            ShopSystem.utils.log("Initializing ShopSystem...", "info");
             
-            // Ensure sellBasketCharacter exists
-            if (!state.ShopSystem.sellBasketCharacter) {
-                state.ShopSystem.sellBasketCharacter = {};
+            // Load basket state early
+            try {
+                ShopSystem.basket.loadBasketState();
+            } catch (error) {
+                ShopSystem.utils.log(`Error loading basket state on init: ${error.message}`, "error");
+            }
+            
+            // Save a reference to state
+            if (!state.ShopSystem) {
+                state.ShopSystem = {
+                    version: CONFIG.version,
+                    messageBuffer: [],
+                    isImporting: false,
+                    activeShop: null,
+                    pendingStock: null,
+                    playerBaskets: {},
+                    sellBaskets: {},
+                        sellBasketCharacter: {}, // Track which character each sell basket belongs to
+                    haggleResults: {},
+                    pendingHaggleRolls: {},
+                    pendingAdvancedSetup: {},
+                    shops: []
+                };
+            }
+                
+                // Ensure sellBasketCharacter exists
+                if (!state.ShopSystem.sellBasketCharacter) {
+                    state.ShopSystem.sellBasketCharacter = {};
+            }
+            
+            // Make sure pendingAdvancedSetup exists
+            if (!state.ShopSystem.pendingAdvancedSetup) {
+                state.ShopSystem.pendingAdvancedSetup = {};
+            }
+            
+            // Make sure shops array exists
+            if (!state.ShopSystem.shops) {
+                state.ShopSystem.shops = [];
+            }
+            
+            // Initialize the shops array in the object as well
+            ShopSystem.shops = state.ShopSystem.shops;
+            
+            // Refresh the shops from handouts
+            try {
+                ShopSystem.utils.refreshShops();
+                ShopSystem.utils.log("Refreshed shops from handouts", "info");
+            } catch (error) {
+                ShopSystem.utils.log(`Error refreshing shops: ${error.message}`, "error");
+            }
+            
+            // Log successful initialization
+            ShopSystem.utils.log(`ShopSystem v${CONFIG.version} initialized successfully!`, "success");
+            ShopSystem.utils.chat(`✅ Shop System v${CONFIG.version} Ready!`);
+            // [TAG: CD_BASKET_LAST_MODIFIED_TRACKING] Ensure lastModifiedBasketItem state exists on system init
+            if (!state.ShopSystem.lastModifiedBasketItem) {
+                state.ShopSystem.lastModifiedBasketItem = {};
+            }
+            // Initialize basket state
+            if (!state.ShopSystem.mergedBaskets) {
+                state.ShopSystem.mergedBaskets = {};
+            }
+            // Initialize baskets if they don't exist
+            if (!state.ShopSystem.baskets) {
+                state.ShopSystem.baskets = {};
+            }
+            if (!state.ShopSystem.sellBaskets) {
+                state.ShopSystem.sellBaskets = {};
+            }
+            // Initialize active characters tracking
+            if (!state.ShopSystem.activeCharacters) {
+                state.ShopSystem.activeCharacters = {};
+            }
+            // [TAG: HAGGLE_BLOCK_STATE] For blocking haggle per player per shop
+            if (!state.ShopSystem.blockedHaggles) {
+                state.ShopSystem.blockedHaggles = {}; // Structure: { shopId: { playerId: true } }
+            }
         }
-        
-        // Make sure pendingAdvancedSetup exists
-        if (!state.ShopSystem.pendingAdvancedSetup) {
-            state.ShopSystem.pendingAdvancedSetup = {};
-        }
-        
-        // Make sure shops array exists
-        if (!state.ShopSystem.shops) {
-            state.ShopSystem.shops = [];
-        }
-        
-        // Initialize the shops array in the object as well
-        ShopSystem.shops = state.ShopSystem.shops;
-        
-        // Refresh the shops from handouts
-        try {
-            ShopSystem.utils.refreshShops();
-            ShopSystem.utils.log("Refreshed shops from handouts", "info");
-        } catch (error) {
-            ShopSystem.utils.log(`Error refreshing shops: ${error.message}`, "error");
-        }
-        
-        // Log successful initialization
-        ShopSystem.utils.log(`ShopSystem v${CONFIG.version} initialized successfully!`, "success");
-        ShopSystem.utils.chat(`✅ Shop System v${CONFIG.version} Ready!`);
-        // [TAG: CD_BASKET_LAST_MODIFIED_TRACKING] Ensure lastModifiedBasketItem state exists on system init
-        if (!state.ShopSystem.lastModifiedBasketItem) {
-            state.ShopSystem.lastModifiedBasketItem = {};
-        }
-        // Initialize basket state
-        if (!state.ShopSystem.mergedBaskets) {
-            state.ShopSystem.mergedBaskets = {};
-        }
-        // Initialize baskets if they don't exist
-        if (!state.ShopSystem.baskets) {
-            state.ShopSystem.baskets = {};
-        }
-        if (!state.ShopSystem.sellBaskets) {
-            state.ShopSystem.sellBaskets = {};
-        }
-        // Initialize active characters tracking
-        if (!state.ShopSystem.activeCharacters) {
-            state.ShopSystem.activeCharacters = {};
-        }
-    }
-};
+    };
 
 // [TAG: MERGED_12_DB_35_SHOP_168] // This tag needs to be fixed
 on('ready', function() {
