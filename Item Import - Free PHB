@@ -1,0 +1,2992 @@
+Club
+- category: weapons
+- rarity: common
+- price: 1 sp
+- weight: 2
+- damage: 1d4 bludgeoning
+- properties: light
+- type: simple
+- description: A short, sturdy stick or piece of wood wielded as a basic melee weapon.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Dagger
+- category: weapons
+- rarity: common
+- price: 2 gp
+- weight: 1
+- damage: 1d4 piercing
+- properties: finesse, light, thrown (20/60)
+- type: simple
+- description: A small, easily concealed blade ideal for close combat or throwing.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Greatclub
+- category: weapons
+- rarity: common
+- price: 2 sp
+- weight: 10
+- damage: 1d8 bludgeoning
+- properties: two-handed
+- type: simple
+- description: A massive club hewn from a tree limb, requiring two hands to wield.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Handaxe
+- category: weapons
+- rarity: common
+- price: 5 gp
+- weight: 2
+- damage: 1d6 slashing
+- properties: light, thrown (20/60)
+- type: simple
+- description: A small axe that doubles as a melee weapon and a throwing axe.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Javelin
+- category: weapons
+- rarity: common
+- price: 5 sp
+- weight: 2
+- damage: 1d6 piercing
+- properties: thrown (30/120)
+- type: simple
+- description: A light spear designed for throwing but usable in melee.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Light Hammer
+- category: weapons
+- rarity: common
+- price: 2 gp
+- weight: 2
+- damage: 1d4 bludgeoning
+- properties: light, thrown (20/60)
+- type: simple
+- description: A small hammer equally suited for melee strikes and throwing.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Mace
+- category: weapons
+- rarity: common
+- price: 5 gp
+- weight: 4
+- damage: 1d6 bludgeoning
+- properties: —
+- type: simple
+- description: A sturdy club topped with a heavy metal head.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Quarterstaff
+- category: weapons
+- rarity: common
+- price: 2 sp
+- weight: 4
+- damage: 1d6 bludgeoning
+- properties: versatile (1d8)
+- type: simple
+- description: A six‑foot length of hardened wood, favored by monks and travelers.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Sickle
+- category: weapons
+- rarity: common
+- price: 1 gp
+- weight: 2
+- damage: 1d4 slashing
+- properties: light
+- type: simple
+- description: A farming implement with a wicked curved blade, adapted for combat.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Crossbow, Light
+- category: weapons
+- rarity: common
+- price: 25 gp
+- weight: 5
+- damage: 1d8 piercing
+- properties: ammunition (80/320), loading, two‑handed
+- type: simple
+- description: A wooden stock fitted with a bowstring, firing bolts with a crank‑and‑trigger.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Shortbow
+- category: weapons
+- rarity: common
+- price: 25 gp
+- weight: 2
+- damage: 1d6 piercing
+- properties: ammunition (80/320), two‑handed
+- type: simple
+- description: A compact bow favored by scouts and hunters.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Sling
+- category: weapons
+- rarity: common
+- price: 1 sp
+- weight: 0
+- damage: 1d4 bludgeoning
+- properties: ammunition (30/120)
+- type: simple
+- description: A leather pouch on two cords capable of hurling stones with surprising force.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Battleaxe
+- category: weapons
+- rarity: common
+- price: 10 gp
+- weight: 4
+- damage: 1d8 slashing
+- properties: versatile (1d10)
+- type: martial
+- description: A sturdy single‑bladed axe designed for brutal melee combat.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Flail
+- category: weapons
+- rarity: common
+- price: 10 gp
+- weight: 2
+- damage: 1d8 bludgeoning
+- properties: —
+- type: martial
+- description: A striking head connected to a handle by a chain, able to bypass shields.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Scimitar
+- category: weapons
+- rarity: common
+- price: 25 gp
+- weight: 3
+- damage: 1d6 slashing
+- properties: finesse, light
+- type: martial
+- description: A curved blade that excels at swift slashing strikes.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Spear
+- category: weapons
+- rarity: common
+- price: 1 gp
+- weight: 3
+- damage: 1d6 piercing
+- properties: thrown (20/60), versatile (1d8)
+- type: simple
+- description: A long haft tipped with a metal point; doubles as a melee or thrown weapon.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Longsword
+- category: weapons
+- rarity: common
+- price: 15 gp
+- weight: 3
+- damage: 1d8 slashing
+- properties: versatile (1d10)
+- type: martial
+- description: A straight, double‑edged blade wielded one‑ or two‑handed.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Rapier
+- category: weapons
+- rarity: common
+- price: 25 gp
+- weight: 2
+- damage: 1d8 piercing
+- properties: finesse
+- type: martial
+- description: A slender blade designed for precise thrusts.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Shortsword
+- category: weapons
+- rarity: common
+- price: 10 gp
+- weight: 2
+- damage: 1d6 piercing
+- properties: finesse, light
+- type: martial
+- description: A light, versatile sword ideal for off‑hand attacks.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Greataxe
+- category: weapons
+- rarity: common
+- price: 30 gp
+- weight: 7
+- damage: 1d12 slashing
+- properties: heavy, two‑handed
+- type: martial
+- description: A massive, double‑bladed axe favored by raging warriors.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Greatsword
+- category: weapons
+- rarity: common
+- price: 50 gp
+- weight: 6
+- damage: 2d6 slashing
+- properties: heavy, two‑handed
+- type: martial
+- description: An immense blade that cleaves foes with sweeping arcs.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Maul
+- category: weapons
+- rarity: common
+- price: 10 gp
+- weight: 10
+- damage: 2d6 bludgeoning
+- properties: heavy, two‑handed
+- type: martial
+- description: A long‑handled hammer with a massive metal head.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Pike
+- category: weapons
+- rarity: common
+- price: 5 gp
+- weight: 18
+- damage: 1d10 piercing
+- properties: heavy, reach, two‑handed
+- type: martial
+- description: A 10‑foot shaft tipped with steel, keeping foes at bay.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Trident
+- category: weapons
+- rarity: common
+- price: 5 gp
+- weight: 4
+- damage: 1d6 piercing
+- properties: thrown (20/60), versatile (1d8)
+- type: martial
+- description: A three‑pronged spear equally deadly in hand or hurled.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Warhammer
+- category: weapons
+- rarity: common
+- price: 15 gp
+- weight: 2
+- damage: 1d8 bludgeoning
+- properties: versatile (1d10)
+- type: martial
+- description: A stout hammer head mounted on a short haft.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Crossbow, Hand
+- category: weapons
+- rarity: common
+- price: 75 gp
+- weight: 3
+- damage: 1d6 piercing
+- properties: ammunition (30/120), light, loading
+- type: martial
+- description: A compact crossbow wielded one‑handed.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Crossbow, Heavy
+- category: weapons
+- rarity: common
+- price: 50 gp
+- weight: 18
+- damage: 1d10 piercing
+- properties: ammunition (100/400), heavy, loading, two‑handed
+- type: martial
+- description: A powerful crossbow that launches bolts with deadly force.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Longbow
+- category: weapons
+- rarity: common
+- price: 50 gp
+- weight: 2
+- damage: 1d8 piercing
+- properties: ammunition (150/600), heavy, two‑handed
+- type: martial
+- description: A six‑foot bow capable of extreme range and penetration.
+- effect: None
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Net
+- category: weapons
+- rarity: common
+- price: 1 gp
+- weight: 3
+- damage: —
+- properties: thrown (5/15), special
+- type: martial
+- description: A weighted mesh used to entangle creatures rather than harm.
+- effect: A Large or smaller creature hit by a net is restrained until it is freed.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Padded Armor
+- category: Armor & Attire
+- rarity: common
+- price: 5 gp
+- weight: 8
+- ac: 11 + Dexterity modifier
+- type: light
+- description: Quilted layers of cloth and batting offering minimal protection.
+- effect: Disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Leather Armor
+- category: Armor & Attire
+- rarity: common
+- price: 10 gp
+- weight: 10
+- ac: 11 + Dexterity modifier
+- type: light
+- description: Well‑tanned leather hardened by boiling in oil.
+- effect: No disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Hide Armor
+- category: Armor & Attire
+- rarity: common
+- price: 10 gp
+- weight: 12
+- ac: 12 + Dexterity modifier (max 2)
+- type: medium
+- description: Thick furs and pelts stitched together for primitive defense.
+- effect: No disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Ring Mail
+- category: Armor & Attire
+- rarity: common
+- price: 30 gp
+- weight: 40
+- ac: 14
+- type: heavy
+- description: Leather armor with heavy rings sewn on for added protection.
+- effect: Disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Breastplate
+- category: Armor & Attire
+- rarity: common
+- price: 400 gp
+- weight: 20
+- ac: 14 + Dexterity modifier (max 2)
+- type: medium
+- description: A fitted metal chest piece worn with supple leather accoutrements.
+- effect: No disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Half Plate
+- category: Armor & Attire
+- rarity: common
+- price: 750 gp
+- weight: 40
+- ac: 15 + Dexterity modifier (max 2)
+- type: medium
+- description: Metal plates that cover vital areas over a mail and leather foundation.
+- effect: Disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Shield
+- category: Armor & Attire
+- rarity: common
+- price: 10 gp
+- weight: 6
+- ac_bonus: +2
+- type: shield
+- description: A broad piece of wood or metal strapped to the forearm to deflect attacks.
+- effect: Provides +2 bonus to AC when wielded.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Studded Leather Armor
+- category: Armor & Attire
+- rarity: common
+- price: 45 gp
+- weight: 13
+- ac: 12 + Dexterity modifier
+- type: light
+- description: Supple leather reinforced with close‑set metal rivets.
+- effect: No disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Chain Shirt
+- category: Armor & Attire
+- rarity: common
+- price: 50 gp
+- weight: 20
+- ac: 13 + Dexterity modifier (max 2)
+- type: medium
+- description: Interlocking metal rings worn over gambeson.
+- effect: No disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Scale Mail
+- category: Armor & Attire
+- rarity: common
+- price: 50 gp
+- weight: 45
+- ac: 14 + Dexterity modifier (max 2)
+- type: medium
+- description: Overlapping metal scales with leather backing.
+- effect: Disadvantage on Dexterity (Stealth) checks.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Chain Mail
+- category: Armor & Attire
+- rarity: common
+- price: 75 gp
+- weight: 55
+- ac: 16
+- type: heavy
+- description: A full suit of interlocking metal rings.
+- effect: Disadvantage on Dexterity (Stealth) checks. Requires Strength 13.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Splint Armor
+- category: Armor & Attire
+- rarity: common
+- price: 200 gp
+- weight: 60
+- ac: 17
+- type: heavy
+- description: Vertical metal strips riveted to leather backing.
+- effect: Disadvantage on Dexterity (Stealth) checks. Requires Strength 15.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Plate Armor
+- category: Armor & Attire
+- rarity: common
+- price: 1,500 gp
+- weight: 65
+- ac: 18
+- type: heavy
+- description: A full suit of shaped, interlocking metal plates.
+- effect: Disadvantage on Dexterity (Stealth) checks. Requires Strength 15.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Clothes, Fine
+- category: Armor & Attire
+- rarity: common
+- price: 15 gp
+- weight: 6
+- description: Elegant garments of high quality.
+- effect: Suitable for formal occasions and high society.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Clothes, Traveler's
+- category: Armor & Attire
+- rarity: common
+- price: 2 gp
+- weight: 4
+- description: Durable clothing for long journeys.
+- effect: Suitable for adventuring and travel.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Backpack
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 5
+- description: A leather pack with straps, holding up to 30 pounds of gear.
+- effect: Can carry up to 30 pounds of equipment.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Bedroll
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 7
+- description: A warm blanket and ground cloth bundled for sleep in the wild.
+- effect: Provides comfort and warmth during long rests.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Blanket
+- category: equipment
+- rarity: common
+- price: 5 sp
+- weight: 3
+- description: A simple wool blanket sized for a Medium creature.
+- effect: Provides warmth and comfort during rest.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Crowbar
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 5
+- description: A heavy iron bar with a curved end.
+- effect: Grants advantage on Strength checks to open doors or containers.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Grappling Hook
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 4
+- description: A metal hook with flukes, used with rope to scale heights.
+- effect: Can be used with rope to climb or secure items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Hammer
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 3
+- description: A small hammer with a wooden handle, used for nails and spikes.
+- effect: Used for driving nails and spikes, or as an improvised weapon.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Holy Water (flask)
+- category: equipment
+- rarity: common
+- price: 25 gp
+- weight: 1
+- description: Water blessed by a cleric or paladin.
+- effect: As an action, splash onto fiends or undead to deal 2d6 radiant damage.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Oil (flask)
+- category: equipment
+- rarity: common
+- price: 1 sp
+- weight: 1
+- description: A flask of thick, flammable oil.
+- effect: Can be poured on the ground to create a slippery surface, or used as fuel for lanterns.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Acid (vial)
+- category: equipment
+- rarity: common
+- price: 25 gp
+- weight: 1
+- description: A vial of corrosive liquid.
+- effect: As an action, splash the corrosive liquid to deal 2d6 acid damage to one target.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Alchemist's Fire (flask)
+- category: equipment
+- rarity: common
+- price: 50 gp
+- weight: 1
+- description: A flask of sticky liquid that ignites on contact with air.
+- effect: Target takes 1d4 fire damage each round until extinguished.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Antitoxin (vial)
+- category: equipment
+- rarity: common
+- price: 50 gp
+- weight: 0
+- description: A vial of antitoxin.
+- effect: Creature that drinks it gains advantage on saving throws against poison for 1 hour.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Ball Bearings (bag of 1,000)
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 2
+- description: A bag of small metal spheres.
+- effect: Spread on a 10-ft square to create difficult footing; DC 10 Dex save or prone.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Block and Tackle
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 5
+- description: A pulley system for lifting heavy objects.
+- effect: Gives advantage on hoisting up to 4 times the load.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Healer's Kit
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 3
+- description: Contains bandages and salves.
+- effect: 10 uses; stabilize a creature without needing a Medicine check.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Rope, Hempen (50 ft)
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 10
+- description: Sturdy rope supporting up to 500 lbs.
+- effect: Can be used for climbing, binding, or securing items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Torch
+- category: equipment
+- rarity: common
+- price: 1 cp
+- weight: 1
+- description: A wooden stick wrapped in oil-soaked cloth.
+- effect: Burns for 1 hour, shedding bright light in a 20-ft radius.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Rations (1 day)
+- category: equipment
+- rarity: common
+- price: 5 sp
+- weight: 2
+- description: Dry foods to sustain one Medium creature for a day.
+- effect: Provides nourishment for one day of travel.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Waterskin
+- category: equipment
+- rarity: common
+- price: 2 sp
+- weight: 5
+- description: Leather pouch holding 4 pints of liquid.
+- effect: Can hold water or other liquids for travel.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Poison, Basic
+- category: equipment
+- rarity: common
+- price: 100 gp
+- weight: 0.1
+- description: A vial of basic poison.
+- effect: Coat one weapon or up to three pieces of ammo; target hit takes extra 1d4 poison damage.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Healing
+- category: potions
+- rarity: common
+- price: 50 gp
+- weight: 0.5
+- description: A crimson liquid that glimmers when agitated.
+- effect: Restores 2d4+2 hit points to the drinker.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Greater Healing
+- category: potions
+- rarity: uncommon
+- price: 200 gp
+- weight: 0.5
+- description: A richer red brew that glimmers when agitated.
+- effect: Restores 4d4+4 hit points to the drinker.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Superior Healing
+- category: potions
+- rarity: rare
+- price: 500 gp
+- weight: 0.5
+- description: A thick ruby solution that glows with healing energy.
+- effect: Restores 8d4+8 hit points to the drinker.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Supreme Healing
+- category: potions
+- rarity: very rare
+- price: 1,350 gp
+- weight: 0.5
+- description: A syrupy scarlet draught that pulses with powerful healing magic.
+- effect: Restores 10d4+20 hit points to the drinker.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Animal Friendship
+- category: potions
+- rarity: uncommon
+- price: 200 gp
+- weight: 0.5
+- description: A sweet-smelling potion that glimmers with a soft golden light.
+- effect: For 1 hour, you can cast animal friendship at will (save DC 13).
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Bag of Holding
+- category: magic
+- rarity: uncommon
+- price: 4,000 gp
+- weight: 15
+- description: A cloth sack that opens into a spacious extradimensional interior able to hold up to 500 lb.
+- effect: Can hold up to 500 pounds or 64 cubic feet of material while weighing only 15 pounds.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Boots of Elvenkind
+- category: magic
+- rarity: uncommon
+- price: 2,500 gp
+- weight: 2
+- description: Soft leather boots that make no sound when walking.
+- effect: Grants advantage on Stealth checks that rely on moving silently.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Boots of Striding and Springing
+- category: magic
+- rarity: uncommon
+- price: 3,000 gp
+- weight: 3
+- description: Enchanted boots that enhance the wearer's mobility.
+- effect: Increases walking speed to 30 ft and triples jump distance.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Cloak of Elvenkind
+- category: magic
+- rarity: uncommon
+- price: 5,000 gp
+- weight: 1
+- description: A cloak that shifts colors to blend with surroundings.
+- effect: Grants advantage on Stealth checks and imposes disadvantage on Perception checks made to see you.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Ring of Protection
+- category: magic
+- rarity: rare
+- price: 8,000 gp
+- weight: 0
+- description: A simple band that provides magical protection.
+- effect: Provides a +1 bonus to AC and all saving throws.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Wand of Magic Missiles
+- category: magic
+- rarity: uncommon
+- price: 7,500 gp
+- weight: 1
+- description: A slender wooden wand carved with arcane symbols.
+- effect: This wand has 7 charges; expend 1 or more charges to cast magic missile (1 charge per 1st‑level slot). Regains 1d6+1 charges daily at dawn.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Spell Scroll (Cantrip)
+- category: scrolls
+- rarity: common
+- price: 10 gp
+- weight: 0
+- description: This scroll holds a cantrip spell.
+- effect: Allows casting of a cantrip once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 1)
+- category: scrolls
+- rarity: common
+- price: 60 gp
+- weight: 0
+- description: This scroll holds a 1st-level spell.
+- effect: Allows casting of a 1st-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 2)
+- category: scrolls
+- rarity: uncommon
+- price: 120 gp
+- weight: 0
+- description: This scroll holds a 2nd-level spell.
+- effect: Allows casting of a 2nd-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 3)
+- category: scrolls
+- rarity: uncommon
+- price: 200 gp
+- weight: 0
+- description: This scroll holds a 3rd-level spell.
+- effect: Allows casting of a 3rd-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 4)
+- category: scrolls
+- rarity: rare
+- price: 320 gp
+- weight: 0
+- description: This scroll holds a 4th-level spell.
+- effect: Allows casting of a 4th-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 5)
+- category: scrolls
+- rarity: rare
+- price: 640 gp
+- weight: 0
+- description: This scroll holds a 5th-level spell.
+- effect: Allows casting of a 5th-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Climbing
+- category: potions
+- rarity: uncommon
+- price: 180 gp
+- weight: 0.5
+- description: A thick, sticky potion that smells of pine resin.
+- effect: For 1 hour, you gain a climbing speed equal to your walking speed and have advantage on Athletics checks made to climb.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Diminution
+- category: potions
+- rarity: uncommon
+- price: 270 gp
+- weight: 0.5
+- description: A clear, shimmering liquid that seems to compress light around it.
+- effect: For 1d4 hours, you gain the reduce effect of the enlarge/reduce spell.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Growth
+- category: potions
+- rarity: uncommon
+- price: 270 gp
+- weight: 0.5
+- description: A thick, bubbling potion that seems to expand and contract.
+- effect: For 1d4 hours, you gain the enlarge effect of the enlarge/reduce spell.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Fire Breath
+- category: potions
+- rarity: uncommon
+- price: 150 gp
+- weight: 0.5
+- description: A warm, orange liquid that glows like embers.
+- effect: For 1 hour, you can exhale fire in a 15-foot cone up to three times, dealing 2d6 fire damage on each use.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Invisibility
+- category: potions
+- rarity: very rare
+- price: 180 gp
+- weight: 0.5
+- description: A clear potion that seems to bend light around it.
+- effect: For 1 hour, you become invisible. The effect ends if you attack or cast a spell.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Boots of the Winterlands
+- category: magic
+- rarity: uncommon
+- price: 4,000 gp
+- weight: 3
+- description: Thick fur-lined boots radiating a faint aura of protective magic.
+- effect: You gain resistance to cold damage, ignore difficult terrain created by ice or snow, and can tolerate frigid temperatures as if adapted to cold climate.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Bracers of Defense
+- category: magic
+- rarity: rare
+- price: 6,000 gp
+- weight: 1
+- description: Thin bands of leather etched with protective runes.
+- effect: Grants +2 AC when not wearing armor or shield.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Brooch of Shielding
+- category: magic
+- rarity: uncommon
+- price: 2,500 gp
+- weight: 1
+- description: A gleaming silver pin containing a tiny shield motif.
+- effect: Grants resistance to force damage and immunity to magic missile.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Cloak of Protection
+- category: magic
+- rarity: uncommon
+- price: 4,000 gp
+- weight: 1
+- description: A shimmering cloak woven with protective enchantments.
+- effect: Grants +1 to AC and all saving throws.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Driftglobe
+- category: magic
+- rarity: uncommon
+- price: 750 gp
+- weight: 1
+- description: A small glass sphere containing a swirling mist.
+- effect: Floats 3 feet off the ground and provides light; can cast daylight once per day.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Gauntlets of Ogre Power
+- category: magic
+- rarity: uncommon
+- price: 5,000 gp
+- weight: 6
+- description: Thick leather gauntlets studded with iron.
+- effect: Sets the wearer's Strength score to 19.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Goggles of Night
+- category: magic
+- rarity: uncommon
+- price: 1,500 gp
+- weight: 0
+- description: Dark lenses set in a leather frame.
+- effect: Grants darkvision up to 60 feet.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Hat of Disguise
+- category: magic
+- rarity: uncommon
+- price: 2,500 gp
+- weight: 0.5
+- description: A seemingly ordinary hat with subtle illusory magic.
+- effect: Allows casting disguise self at will.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Ring of Feather Falling
+- category: magic
+- rarity: rare
+- price: 2,000 gp
+- weight: 0
+- description: A slender silver ring with feather motifs.
+- effect: Slows falling speed to 60 feet per round and prevents falling damage.
+- attunement: yes
+- consumable: no
+- source: Free PHB
+
+Riding Horse
+- category: Mounts & Vehicles
+- rarity: common
+- price: 75 gp
+- weight: —
+- description: A trained light horse suitable for riding.
+- effect: Speed 60 ft, carries up to 480 lb.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Draft Horse
+- category: Mounts & Vehicles
+- rarity: common
+- price: 50 gp
+- weight: —
+- description: A sturdy horse bred for hauling carts and plows.
+- effect: Speed 40 ft, carries up to 540 lb.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Pony
+- category: Mounts & Vehicles
+- rarity: common
+- price: 30 gp
+- weight: —
+- description: A small but hardy mount favored by dwarves and halflings.
+- effect: Speed 40 ft.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Cart
+- category: Mounts & Vehicles
+- rarity: common
+- price: 15 gp
+- weight: —
+- description: A two-wheeled wooden cart that can be pulled by one draft animal.
+- effect: Can carry up to 300 lb.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Wagon
+- category: Mounts & Vehicles
+- rarity: common
+- price: 35 gp
+- weight: —
+- description: A four-wheeled wagon capable of hauling bulky cargo or several passengers.
+- effect: Can carry up to 1 ton.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Inn Stay (Modest)
+- category: Services
+- rarity: common
+- price: 5 sp
+- weight: —
+- description: A small private room with lumpy mattress.
+- effect: Provides secure lodging for one night.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Inn Stay (Comfortable)
+- category: Services
+- rarity: common
+- price: 8 sp
+- weight: —
+- description: A clean private room with decent furnishings.
+- effect: Provides secure and comfortable lodging for one night.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Meal (Modest)
+- category: Services
+- rarity: common
+- price: 1 sp
+- weight: —
+- description: Hearty fare of bread, cheese, and small meat portions.
+- effect: Provides nourishment for one meal.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Meal (Comfortable)
+- category: Services
+- rarity: common
+- price: 2 sp
+- weight: —
+- description: A satisfying plate with varied ingredients.
+- effect: Provides nourishment and satisfaction for one meal.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Oil of Slipperiness
+- category: potions
+- rarity: uncommon
+- price: 250 gp
+- weight: 0.5
+- description: A clear, slick oil that seems to repel everything it touches.
+- effect: When applied to a creature or surface, grants the effects of freedom of movement for 8 hours or creates a grease effect.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Wand of Web
+- category: magic
+- rarity: uncommon
+- price: 8,000 gp
+- weight: 1
+- description: A wand carved from dark wood with web-like patterns.
+- effect: This wand has 7 charges; expend 1 charge to cast web (DC 15). Regains 1d6+1 daily.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+HB - Umbral Shroud
+- category: magic
+- rarity: rare
+- price: 4,000 gp
+- weight: 1
+- description: A cloak made of fabric that seems to absorb light around it.
+- effect: While in dim light or darkness, the wearer can use a bonus action to become invisible for 1 minute. This effect ends if you attack or cast a spell.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Flametouch Gauntlet
+- category: magic
+- rarity: uncommon
+- price: 2,200 gp
+- weight: 2
+- description: A gauntlet forged from brass and copper with flame designs etched on the knuckles.
+- effect: The wearer can use an action to cause the gauntlet to burst into flame. While flaming, melee attacks with the gauntlet deal an additional 1d6 fire damage. The flame lasts for 1 minute or until dismissed.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Boots of Silent Passage
+- category: magic
+- rarity: uncommon
+- price: 1,800 gp
+- weight: 1
+- description: Soft-soled boots that leave no footprints when worn.
+- effect: The wearer makes no sound when moving and cannot be tracked by nonmagical means. Grants advantage on Dexterity (Stealth) checks.
+- attunement: yes
+- consumable: no
+- source: HB
+
+Abacus
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 2
+- description: A counting frame for calculations.
+- effect: Used for performing mathematical calculations.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Barrel
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 70
+- description: A large wooden container that holds 40 gallons.
+- effect: Can store large quantities of liquid or dry goods.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Basket
+- category: equipment
+- rarity: common
+- price: 4 sp
+- weight: 2
+- description: A woven basket that holds up to 40 lb.
+- effect: Can carry up to 40 pounds of items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Bottle, Glass
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 2
+- description: A glass bottle that holds 1½ pints.
+- effect: Can contain liquids safely.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Chain (10 ft.)
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 10
+- description: Heavy chain useful for binding or lifting.
+- effect: Has AC 10, 5 hit points, and can be burst with a DC 20 Strength check.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Climbing Kit
+- category: equipment
+- rarity: common
+- price: 25 gp
+- weight: 12
+- description: Includes special pitons, gloves, boots, and small climbing tools.
+- effect: Grants advantage on Strength (Athletics) checks made to climb; you can't fall more than 25 ft if properly anchored.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Component Pouch
+- category: equipment
+- rarity: common
+- price: 25 gp
+- weight: 2
+- description: A small watertight leather pouch with compartments for spell components.
+- effect: Contains all components needed for spellcasting that don't have a specified cost.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Candle
+- category: equipment
+- rarity: common
+- price: 1 cp
+- weight: 0
+- description: A wax cylinder with embedded wick.
+- effect: Burns for 1 hour, shedding dim light in a 5‑ft radius.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Caltrops (bag of 20)
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 2
+- description: Spiked metal tetrahedrons that point upward when scattered.
+- effect: Creatures moving through the area reduce speed by half and may take 1 piercing damage.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Skilled Hireling (per day)
+- category: Services
+- rarity: common
+- price: 2 gp
+- weight: —
+- description: A worker with proficiency, such as a guard, artisan, or scribe.
+- effect: Provides skilled labor for one day.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Untrained Hireling (per day)
+- category: Services
+- rarity: common
+- price: 2 sp
+- weight: —
+- description: Laborer or porter requiring no special skills.
+- effect: Provides unskilled labor for one day.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Messenger (per mile)
+- category: Services
+- rarity: common
+- price: 2 cp
+- weight: —
+- description: Courier willing to carry messages quickly overland.
+- effect: Delivers a message over a specified distance.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (1st‑level spell)
+- category: Services
+- rarity: common
+- price: 50 gp
+- weight: —
+- description: A willing caster performs a 1st‑level spell.
+- effect: Provides the effects of a 1st-level spell cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+HB - Crystalline Dagger
+- category: weapons
+- rarity: uncommon
+- price: 350 gp
+- weight: 1
+- damage: 1d4 piercing
+- properties: finesse, light, thrown (20/60)
+- type: simple
+- description: A dagger with a blade made of translucent crystal that gleams with inner light.
+- effect: When you score a critical hit, the target is blinded until the end of its next turn.
+- attunement: no
+- consumable: no
+- source: HB
+
+HB - Sword Of Sharpness
+- category: weapons
+- rarity: very rare
+- price: 2200 gp
+- weight: 3
+- damage: 1d8 slashing
+- properties: versatile (1d10)
+- type: martial
+- description: This sword cuts through objects and flesh with unnatural ease.
+- effect: On a roll of 20, target takes an extra 4d6 slashing damage and may lose a limb.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Scimitar Of Speed
+- category: weapons
+- rarity: very rare
+- price: 1800 gp
+- weight: 3
+- damage: 1d6 slashing
+- properties: finesse, light
+- type: martial
+- description: A finely curved blade that moves with incredible swiftness.
+- effect: You gain a +2 bonus to attack and damage rolls with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns.
+- attunement: yes
+- consumable: no
+- source: HB
+
+Armor +1
+- category: Armor & Attire
+- rarity: rare
+- price: 1,500 gp
+- weight: varies
+- description: A suit of armor enhanced with protective magic.
+- effect: While wearing this armor, you gain a +1 bonus to AC.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Shield +1
+- category: Armor & Attire
+- rarity: rare
+- price: 1,500 gp
+- weight: 6
+- description: A shield enhanced with protective magic.
+- effect: While wielding this shield, you gain a +1 bonus to AC (in addition to the shield's normal AC bonus).
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Weapon +1
+- category: weapons
+- rarity: uncommon
+- price: 2,000 gp
+- weight: varies
+- description: A weapon enhanced with combat magic.
+- effect: You gain a +1 bonus to attack and damage rolls made with this magic weapon.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Ammunition +1 (20)
+- category: weapons
+- rarity: uncommon
+- price: 100 gp
+- weight: 1
+- description: Arrows, bolts, or bullets enhanced with magic.
+- effect: Gain a +1 bonus to attack and damage rolls with these projectiles.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+HB - Amulet of Whispers
+- category: magic
+- rarity: uncommon
+- price: 800 gp
+- weight: 1
+- description: A small pendant carved with a mouth motif, which seems to murmur quietly when held.
+- effect: The wearer can cast message at will, and comprehend languages once per day.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Circlet of Intellect
+- category: magic
+- rarity: rare
+- price: 3,500 gp
+- weight: 1
+- description: A thin silver band inlaid with small sapphires.
+- effect: While wearing this circlet, your Intelligence score becomes 19. The circlet has no effect if your Intelligence is already 19 or higher.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Gloves of Missile Snaring
+- category: magic
+- rarity: uncommon
+- price: 1,600 gp
+- weight: 0.5
+- description: Supple leather gloves that seem to blur slightly when small objects approach rapidly.
+- effect: When a ranged weapon attack hits you while wearing these gloves, you can use your reaction to reduce the damage by 1d10 + your Dexterity modifier.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Ring of Mind Shielding
+- category: magic
+- rarity: uncommon
+- price: 1,750 gp
+- weight: 0
+- description: A simple silver ring with runes engraved on the inner band.
+- effect: While wearing this ring, you are immune to magic that allows other creatures to read your thoughts or determine whether you are lying. Creatures can only communicate with you telepathically if you allow it.
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Staff of Healing
+- category: magic
+- rarity: rare
+- price: 8,000 gp
+- weight: 4
+- description: A staff of ash wood, topped with a silver caduceus symbol.
+- effect: This staff has 10 charges and regains 1d6+4 charges daily at dawn. While holding it, you can expend charges to cast cure wounds (1 charge per spell level), lesser restoration (2 charges), or mass cure wounds (5 charges).
+- attunement: yes
+- consumable: no
+- source: HB
+
+HB - Whistle of Bird Calling
+- category: equipment
+- rarity: common
+- price: 85 gp
+- weight: 0
+- description: A small wooden whistle that makes a variety of birdcalls.
+- effect: When blown, summons 2d4 ordinary birds of the local region. The birds are not under your control and fly away after 1 minute.
+- attunement: no
+- consumable: no
+- source: HB
+
+HB - Everlasting Rations
+- category: equipment
+- rarity: uncommon
+- price: 350 gp
+- weight: 2
+- description: A small box containing magically preserved food.
+- effect: The box produces enough bland but nourishing food to sustain one Medium creature for one day. After food is removed, new food appears at dawn the next day.
+- attunement: no
+- consumable: no
+- source: HB
+
+HB - Potion of Truth
+- category: potions
+- rarity: uncommon
+- price: 150 gp
+- weight: 0.5
+- description: A clear, slightly silvery liquid that reflects light in unusual patterns.
+- effect: A creature that drinks this potion can't knowingly speak a lie for 1 hour. You can specify that the creature must answer questions truthfully during this time, or you can prohibit it from speaking at all.
+- attunement: no
+- consumable: yes
+- source: HB
+
+Potion of Gaseous Form
+- category: potions
+- rarity: rare
+- price: 300 gp
+- weight: 0.5
+- description: A misty, translucent potion that seems to evaporate at the edges.
+- effect: For 1 hour, you gain the effects of the gaseous form spell.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Heroism
+- category: potions
+- rarity: rare
+- price: 180 gp
+- weight: 0.5
+- description: A golden liquid that sparkles with divine energy.
+- effect: For 1 hour, you gain 10 temporary hit points and the effects of the bless spell (no concentration required).
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Hill Giant Strength
+- category: potions
+- rarity: uncommon
+- price: 400 gp
+- weight: 0.5
+- description: A thick, earthy liquid that seems to pulse with raw power.
+- effect: For 1 hour, your Strength score becomes 21.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Donkey or Mule
+- category: Mounts & Vehicles
+- rarity: common
+- price: 8 gp
+- weight: —
+- description: Sure-footed beast of burden capable of carrying heavy loads.
+- effect: Speed 40 ft, carries up to 420 lb.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Mastiff
+- category: Mounts & Vehicles
+- rarity: common
+- price: 25 gp
+- weight: —
+- description: A powerful, disciplined dog that can serve as a mount for a Small rider.
+- effect: Speed 40 ft, carries up to 195 lb.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Spell Scroll (Level 6)
+- category: scrolls
+- rarity: very rare
+- price: 1,280 gp
+- weight: 0
+- description: This scroll holds a 6th-level spell.
+- effect: Allows casting of a 6th-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 7)
+- category: scrolls
+- rarity: very rare
+- price: 2,560 gp
+- weight: 0
+- description: This scroll holds a 7th-level spell.
+- effect: Allows casting of a 7th-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 8)
+- category: scrolls
+- rarity: very rare
+- price: 5,120 gp
+- weight: 0
+- description: This scroll holds an 8th-level spell.
+- effect: Allows casting of an 8th-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spell Scroll (Level 9)
+- category: scrolls
+- rarity: legendary
+- price: 10,240 gp
+- weight: 0
+- description: This scroll holds a 9th-level spell.
+- effect: Allows casting of a 9th-level spell once without using spell slots.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Flying
+- category: potions
+- rarity: very rare
+- price: 500 gp
+- weight: 0.5
+- description: A light blue liquid that seems to float within its container.
+- effect: For 1 hour, you gain a flying speed equal to your walking speed and can hover.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Mind Reading
+- category: potions
+- rarity: rare
+- price: 180 gp
+- weight: 0.5
+- description: A swirling purple liquid that seems to pulse with psychic energy.
+- effect: For 1 minute, you gain the effects of the detect thoughts spell (save DC 13).
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Poison
+- category: potions
+- rarity: uncommon
+- price: 100 gp
+- weight: 0.5
+- description: A potion that appears identical to a potion of healing.
+- effect: When consumed, deals 3d6 poison damage and poisons the drinker (DC 13 Constitution save).
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Resistance
+- category: potions
+- rarity: uncommon
+- price: 300 gp
+- weight: 0.5
+- description: A thick liquid that shimmers with protective energy.
+- effect: For 1 hour, you gain resistance to one type of damage (chosen when the potion is created).
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Speed
+- category: potions
+- rarity: very rare
+- price: 400 gp
+- weight: 0.5
+- description: A bright yellow liquid that seems to move faster than it should.
+- effect: For 1 minute, you gain the effects of the haste spell.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Frost Giant Strength
+- category: potions
+- rarity: rare
+- price: 500 gp
+- weight: 0.5
+- description: A crystalline liquid that glistens with icy power.
+- effect: For 1 hour, your Strength score becomes 23.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Fire Giant Strength
+- category: potions
+- rarity: rare
+- price: 600 gp
+- weight: 0.5
+- description: A bubbling red liquid that radiates intense heat.
+- effect: For 1 hour, your Strength score becomes 25.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Stone Giant Strength
+- category: potions
+- rarity: rare
+- price: 500 gp
+- weight: 0.5
+- description: A thick, gray liquid that seems to have the weight of stone.
+- effect: For 1 hour, your Strength score becomes 23.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Cloud Giant Strength
+- category: potions
+- rarity: very rare
+- price: 800 gp
+- weight: 0.5
+- description: A misty white liquid that seems to float within its container.
+- effect: For 1 hour, your Strength score becomes 27.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Potion of Storm Giant Strength
+- category: potions
+- rarity: very rare
+- price: 1,000 gp
+- weight: 0.5
+- description: A crackling blue liquid that seems to contain lightning.
+- effect: For 1 hour, your Strength score becomes 29.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Holy Symbol, Amulet
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 1
+- description: A holy symbol worn as a pendant around the neck.
+- effect: Can be used as a spellcasting focus for clerical or paladin spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Holy Symbol, Emblem
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 0
+- description: A holy symbol emblazoned on a shield or worn clothing.
+- effect: Can be used as a spellcasting focus for clerical or paladin spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Holy Symbol, Reliquary
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 2
+- description: A box containing sacred relics.
+- effect: Can be used as a spellcasting focus for clerical or paladin spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Arcane Focus, Crystal
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 1
+- description: A specially prepared crystal that channels arcane energy.
+- effect: Can be used as a spellcasting focus for arcane spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Arcane Focus, Orb
+- category: equipment
+- rarity: common
+- price: 20 gp
+- weight: 3
+- description: A spherical object that focuses arcane energy.
+- effect: Can be used as a spellcasting focus for arcane spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Arcane Focus, Rod
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 2
+- description: A rod designed to channel arcane power.
+- effect: Can be used as a spellcasting focus for arcane spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Arcane Focus, Staff
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 4
+- description: A wooden staff designed to channel arcane power.
+- effect: Can be used as a spellcasting focus for arcane spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Arcane Focus, Wand
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 1
+- description: A specially crafted wand that channels arcane energy.
+- effect: Can be used as a spellcasting focus for arcane spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Druidic Focus, Sprig of Mistletoe
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 0
+- description: A sprig of mistletoe harvested with a golden sickle under a full moon.
+- effect: Can be used as a spellcasting focus for druidic spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Druidic Focus, Totem
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 0
+- description: A small natural object imbued with spiritual significance.
+- effect: Can be used as a spellcasting focus for druidic spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Druidic Focus, Wooden Staff
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 4
+- description: A staff drawn from a living tree with special ceremonies.
+- effect: Can be used as a spellcasting focus for druidic spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Druidic Focus, Yew Wand
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 1
+- description: A wand crafted from sacred yew wood.
+- effect: Can be used as a spellcasting focus for druidic spells.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Alchemist's Supplies
+- category: tools
+- rarity: common
+- price: 50 gp
+- weight: 8
+- description: A collection of containers, chemicals, and equipment for alchemical work.
+- effect: Required to craft alchemical items and potions.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Brewer's Supplies
+- category: tools
+- rarity: common
+- price: 20 gp
+- weight: 9
+- description: Equipment for brewing beer, mead, wine, and other alcoholic beverages.
+- effect: Required to craft alcoholic beverages.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Calligrapher's Supplies
+- category: tools
+- rarity: common
+- price: 10 gp
+- weight: 5
+- description: Pens, ink, parchment, and other writing equipment.
+- effect: Required for creating calligraphic works and forgeries.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Carpenter's Tools
+- category: tools
+- rarity: common
+- price: 8 gp
+- weight: 6
+- description: Saws, hammers, nails, and other woodworking tools.
+- effect: Required for woodworking crafting.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Cartographer's Tools
+- category: tools
+- rarity: common
+- price: 15 gp
+- weight: 6
+- description: Parchment, pens, inks, and calipers for mapmaking.
+- effect: Required for creating accurate maps.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Cobbler's Tools
+- category: tools
+- rarity: common
+- price: 5 gp
+- weight: 5
+- description: Awl, hammer, knife, and other tools for shoemaking.
+- effect: Required for crafting and repairing footwear.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Cook's Utensils
+- category: tools
+- rarity: common
+- price: 1 gp
+- weight: 8
+- description: Pots, pans, knives, and other equipment for food preparation.
+- effect: Required for preparing elaborate meals.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Disguise Kit
+- category: tools
+- rarity: common
+- price: 25 gp
+- weight: 3
+- description: Cosmetics, hair dye, and small props to change one's appearance.
+- effect: Grants the ability to create effective disguises.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Forgery Kit
+- category: tools
+- rarity: common
+- price: 15 gp
+- weight: 5
+- description: Papers, pens, seals, and other equipment for creating forgeries.
+- effect: Allows the creation of forged documents.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Glassblower's Tools
+- category: tools
+- rarity: common
+- price: 30 gp
+- weight: 5
+- description: Blowpipe, small furnace, and other tools for working glass.
+- effect: Required for crafting glass items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Herbalism Kit
+- category: tools
+- rarity: common
+- price: 5 gp
+- weight: 3
+- description: Clippers, mortar and pestle, pouches, and vials for herb collection.
+- effect: Required for creating potions of healing and identifying plants.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Jeweler's Tools
+- category: tools
+- rarity: common
+- price: 25 gp
+- weight: 2
+- description: Tiny saws, hammers, files, and other tools for working with gems.
+- effect: Required for gem cutting and jewelry crafting.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Leatherworker's Tools
+- category: tools
+- rarity: common
+- price: 5 gp
+- weight: 5
+- description: Knives, awls, needles, and other tools for working leather.
+- effect: Required for leather crafting.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Mason's Tools
+- category: tools
+- rarity: common
+- price: 10 gp
+- weight: 8
+- description: Trowels, chisels, brushes, and squares for stonework.
+- effect: Required for stone crafting and construction.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Navigator's Tools
+- category: tools
+- rarity: common
+- price: 25 gp
+- weight: 2
+- description: Sextant, compass, calipers, and charts for navigation.
+- effect: Required for precise navigation, especially at sea.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Painter's Supplies
+- category: tools
+- rarity: common
+- price: 10 gp
+- weight: 5
+- description: Brushes, canvas, pigments, and other art supplies.
+- effect: Required for creating paintings and artwork.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Potter's Tools
+- category: tools
+- rarity: common
+- price: 10 gp
+- weight: 3
+- description: Clay, shaping tools, and a small kiln for pottery.
+- effect: Required for pottery crafting.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Smith's Tools
+- category: tools
+- rarity: common
+- price: 20 gp
+- weight: 8
+- description: Hammers, tongs, charcoal, and other metalworking equipment.
+- effect: Required for metalwork and smithing.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Thieves' Tools
+- category: tools
+- rarity: common
+- price: 25 gp
+- weight: 1
+- description: Lockpicks, small files, and other tools for bypassing locks.
+- effect: Required for picking locks and disarming traps.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Tinker's Tools
+- category: tools
+- rarity: common
+- price: 50 gp
+- weight: 10
+- description: Tiny hammers, gears, screwdrivers, and other clockwork tools.
+- effect: Required for repairing mechanical items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Weaver's Tools
+- category: tools
+- rarity: common
+- price: 1 gp
+- weight: 5
+- description: Thread, needles, and tools for cloth and tapestry creation.
+- effect: Required for weaving and cloth crafting.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Woodcarver's Tools
+- category: tools
+- rarity: common
+- price: 1 gp
+- weight: 5
+- description: Carving knives, chisels, and small saws for woodcarving.
+- effect: Required for detailed woodworking.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Lute
+- category: instruments
+- rarity: common
+- price: 35 gp
+- weight: 2
+- description: A stringed musical instrument with a rounded body.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Flute
+- category: instruments
+- rarity: common
+- price: 2 gp
+- weight: 1
+- description: A slender woodwind instrument with fingerholes.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Horn
+- category: instruments
+- rarity: common
+- price: 3 gp
+- weight: 2
+- description: A brass or bone wind instrument.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Pan Flute
+- category: instruments
+- rarity: common
+- price: 12 gp
+- weight: 2
+- description: A set of joined reed pipes of different lengths.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Drum
+- category: instruments
+- rarity: common
+- price: 6 gp
+- weight: 3
+- description: A percussion instrument with a stretched membrane.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB 
+
+Dulcimer
+- category: instruments
+- rarity: common
+- price: 25 gp
+- weight: 10
+- description: A stringed instrument played with small hammers.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Lyre
+- category: instruments
+- rarity: common
+- price: 30 gp
+- weight: 2
+- description: A U-shaped stringed instrument with a crossbar and soundbox.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Shawm
+- category: instruments
+- rarity: common
+- price: 2 gp
+- weight: 1
+- description: A double-reed woodwind instrument with a conical bore.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Viol
+- category: instruments
+- rarity: common
+- price: 30 gp
+- weight: 1
+- description: A bowed string instrument similar to a violin.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Bagpipes
+- category: instruments
+- rarity: common
+- price: 30 gp
+- weight: 6
+- description: A wind instrument with reed pipes and an air bag.
+- effect: Can be used for bardic performances and inspiration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Deck of Playing Cards
+- category: gaming
+- rarity: common
+- price: 5 sp
+- weight: 0
+- description: A standard deck of 52 playing cards plus jokers.
+- effect: Can be used for various card games and gambling.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Dice Set
+- category: gaming
+- rarity: common
+- price: 1 sp
+- weight: 0
+- description: A set of 5-6 dice of various shapes for games of chance.
+- effect: Can be used for various dice games and gambling.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Dragonchess Set
+- category: gaming
+- rarity: common
+- price: 1 gp
+- weight: 0.5
+- description: A three-tiered chess set representing aerial, surface, and underground forces.
+- effect: Can be played to demonstrate tactical thinking and strategic planning.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Three-Dragon Ante Set
+- category: gaming
+- rarity: common
+- price: 1 gp
+- weight: 0
+- description: Special cards representing various dragons and their moves.
+- effect: Can be used to play the popular Three-Dragon Ante tavern game.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Gaming Set, Miscellaneous
+- category: gaming
+- rarity: common
+- price: 5 sp
+- weight: 1
+- description: Other board or card games not specified separately.
+- effect: Can be used for various games and gambling.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Fishing Tackle
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 4
+- description: Includes a wooden rod, silk line, corkwood bobbers, hooks, leads, and bait.
+- effect: Can be used to catch fish from bodies of water.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Hunting Trap
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 25
+- description: A metal trap with serrated, spring-loaded jaws.
+- effect: When triggered, target must make a DC 13 Dex save or take 1d4 piercing damage and stop moving.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Lantern, Bullseye
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 2
+- description: A hooded lantern with a shutter that produces a bright beam.
+- effect: Burns 1 pint of oil per 6 hrs; casts bright light in a 60‑ft cone and dim light 60 ft beyond.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Lock
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 1
+- description: A sturdy metal lock with a key.
+- effect: Picking a lock requires thieves' tools and a DC 15 Dex check; lock has 10 hp.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Manacles
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 6
+- description: Metal restraints used to bind prisoners.
+- effect: Escape DC 20 Dex; breaking DC 20 Str; come with one key.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Mess Kit
+- category: equipment
+- rarity: common
+- price: 2 sp
+- weight: 1
+- description: Tin box with knife, fork, spoon, plate and cup that clamp together.
+- effect: Allows for preparing and eating meals while traveling.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Mirror, Steel
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 0.5
+- description: Polished steel mirror in a wooden frame.
+- effect: Can be used for personal grooming or signaling with light.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Paper (one sheet)
+- category: equipment
+- rarity: common
+- price: 2 sp
+- weight: 0
+- description: A sheet of fine paper for writing or drawing.
+- effect: Used for writing, drawing, or spellcasting.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Parchment (one sheet)
+- category: equipment
+- rarity: common
+- price: 1 sp
+- weight: 0
+- description: A sheet of parchment made of treated animal skin.
+- effect: Used for writing, drawing, or spellcasting.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Piton
+- category: equipment
+- rarity: common
+- price: 5 cp
+- weight: 0.25
+- description: Iron spike with ring for securing rope while climbing.
+- effect: Can be driven into surfaces to create anchors for climbing.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Pole (10‑foot)
+- category: equipment
+- rarity: common
+- price: 5 cp
+- weight: 7
+- description: A 10‑ft wooden pole useful for probing surfaces or vaulting gaps.
+- effect: Can be used to test floors, trigger traps, or measure depths.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Pot, Iron
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 10
+- description: Large iron cooking pot with lid.
+- effect: Used for cooking meals while camping or traveling.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Pouch
+- category: equipment
+- rarity: common
+- price: 5 sp
+- weight: 1
+- description: Small leather pouch that holds 20 sling bullets or 50 coins.
+- effect: Provides storage for small items or currency.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Quiver
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 1
+- description: Holds up to 20 arrows or bolts.
+- effect: Provides easy access to ammunition during combat.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Ram, Portable
+- category: equipment
+- rarity: common
+- price: 4 gp
+- weight: 35
+- description: Iron‑shod log with handles; used to break down doors.
+- effect: Up to 4 creatures can use; +4 bonus to Strength checks to break doors.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Rope, Silk (50 ft)
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 5
+- description: Stronger and lighter than hemp rope.
+- effect: Halves weight of hemp rope; supports up to 3,000 lb.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Sack
+- category: equipment
+- rarity: common
+- price: 1 cp
+- weight: 0.5
+- description: Rough cloth sack holding up to 30 lb of gear.
+- effect: Can carry up to 30 pounds of items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Scale, Merchant's
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 3
+- description: Small balance and pans for weighing gems and trade goods.
+- effect: Used for accurately measuring small weights.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Sealing Wax
+- category: equipment
+- rarity: common
+- price: 5 sp
+- weight: 0
+- description: Stick of wax melted to seal documents; impression made with signet.
+- effect: Used with signet ring to create official seals.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Shovel
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 5
+- description: Sturdy iron‑bladed digging tool.
+- effect: Can be used for digging, excavation, or as an improvised weapon.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Signal Whistle
+- category: equipment
+- rarity: common
+- price: 5 cp
+- weight: 0
+- description: Produces a piercing sound audible up to 500 ft.
+- effect: Can be used to signal allies or attract attention.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Soap
+- category: equipment
+- rarity: common
+- price: 2 cp
+- weight: 0
+- description: Block of scented or lye soap for washing.
+- effect: Used for cleaning and maintaining hygiene.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Tent, Two‑Person
+- category: equipment
+- rarity: common
+- price: 2 gp
+- weight: 20
+- description: Canvas shelter that sleeps two Medium creatures.
+- effect: Provides shelter from weather during overnight rests.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Hourglass
+- category: equipment
+- rarity: common
+- price: 25 gp
+- weight: 1
+- description: Measures one hour when inverted; delicate and costly.
+- effect: Can be used to measure the passage of time.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Bucket
+- category: equipment
+- rarity: common
+- price: 5 cp
+- weight: 2
+- description: A simple wooden bucket.
+- effect: Can be used to carry water or other materials.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Case, Map or Scroll
+- category: equipment
+- rarity: common
+- price: 1 gp
+- weight: 1
+- description: Cylindrical leather case that can hold up to 10 rolled sheets of paper or 5 rolled parchment.
+- effect: Protects maps and scrolls from damage while traveling.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Chalk (1 piece)
+- category: equipment
+- rarity: common
+- price: 1 cp
+- weight: 0
+- description: A stick of chalk useful for marking surfaces.
+- effect: Can be used to mark surfaces or leave messages.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Chest
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 25
+- description: A sturdy wooden chest.
+- effect: Can securely store and transport items.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Costume
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 4
+- description: A set of clothes for disguise.
+- effect: Provides a basic costume for performance or infiltration.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Flask
+- category: equipment
+- rarity: common
+- price: 2 cp
+- weight: 1
+- description: A metal or clay flask that holds 1 pint.
+- effect: Can store small amounts of liquid.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Ink (1‑oz. bottle)
+- category: equipment
+- rarity: common
+- price: 10 gp
+- weight: 0
+- description: Black ink sufficient for 500 pages.
+- effect: Used for writing, drawing, or spellcasting.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Ink Pen
+- category: equipment
+- rarity: common
+- price: 2 cp
+- weight: 0
+- description: A simple quill or steel nib pen.
+- effect: Used with ink for writing and drawing.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Jug
+- category: equipment
+- rarity: common
+- price: 2 cp
+- weight: 4
+- description: A ceramic jug that holds 1 gallon.
+- effect: Can store up to 1 gallon of liquid.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Ladder (10‑ft.)
+- category: equipment
+- rarity: common
+- price: 1 sp
+- weight: 25
+- description: A wooden ladder 10 feet tall.
+- effect: Allows access to heights up to 10 feet.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Signet Ring
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 0
+- description: A ring bearing a family crest, used with sealing wax.
+- effect: Can be used to create an official seal on documents.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Clothes, Common
+- category: Armor & Attire
+- rarity: common
+- price: 5 sp
+- weight: 3
+- description: Plain clothing suitable for everyday wear.
+- effect: Standard attire for most people.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Lantern, Hooded
+- category: equipment
+- rarity: common
+- price: 5 gp
+- weight: 2
+- description: Hooded lantern emitting bright light in 30 ft.
+- effect: Provides bright light in a 30-foot radius and dim light for an additional 30 feet; hood can be lowered to reduce to dim light in a 5-foot radius.
+- attunement: no
+- consumable: no
+- source: Free PHB
+
+Ale (mug)
+- category: Services
+- rarity: common
+- price: 4 cp
+- weight: —
+- description: A hearty mug of common ale served in taverns.
+- effect: Provides refreshment and slight intoxication.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Wine (bottle, common)
+- category: Services
+- rarity: common
+- price: 2 sp
+- weight: —
+- description: A bottle of common table wine.
+- effect: Provides refreshment and slight intoxication.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Wine (bottle, fine)
+- category: Services
+- rarity: common
+- price: 10 gp
+- weight: —
+- description: A bottle of fine vintage wine.
+- effect: Provides refreshment and slight intoxication; suitable for special occasions.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Inn Stay (Squalid)
+- category: Services
+- rarity: common
+- price: 7 cp
+- weight: —
+- description: Shared floor space in a dingy common room.
+- effect: Provides basic shelter for one night.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Inn Stay (Poor)
+- category: Services
+- rarity: common
+- price: 1 sp
+- weight: —
+- description: A lice‑ridden straw pallet in a shared room.
+- effect: Provides basic sleeping accommodations for one night.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Inn Stay (Wealthy)
+- category: Services
+- rarity: common
+- price: 2 gp
+- weight: —
+- description: A spacious suite with quality service.
+- effect: Provides luxurious accommodations for one night.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Inn Stay (Aristocratic)
+- category: Services
+- rarity: common
+- price: 4 gp
+- weight: —
+- description: Luxury accommodations with servants on call.
+- effect: Provides elite accommodations for one night.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (Cantrip)
+- category: Services
+- rarity: common
+- price: 30 gp
+- weight: —
+- description: A willing caster performs a cantrip on your behalf.
+- effect: Provides the effects of a cantrip cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (2nd‑level spell)
+- category: Services
+- rarity: common
+- price: 200 gp
+- weight: —
+- description: A willing caster performs a 2nd‑level spell.
+- effect: Provides the effects of a 2nd-level spell cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (3rd‑level spell)
+- category: Services
+- rarity: common
+- price: 300 gp
+- weight: —
+- description: A willing caster performs a 3rd‑level spell.
+- effect: Provides the effects of a 3rd-level spell cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (4th‑5th‑level spell)
+- category: Services
+- rarity: common
+- price: 2,000 gp
+- weight: —
+- description: A willing caster performs a 4th‑ or 5th‑level spell.
+- effect: Provides the effects of a 4th or 5th-level spell cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (6th‑8th‑level spell)
+- category: Services
+- rarity: common
+- price: 20,000 gp
+- weight: —
+- description: A willing caster performs a 6th‑ to 8th‑level spell.
+- effect: Provides the effects of a 6th to 8th-level spell cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Spellcasting Service (9th‑level spell)
+- category: Services
+- rarity: common
+- price: 100,000 gp
+- weight: —
+- description: A willing caster performs a 9th‑level spell.
+- effect: Provides the effects of a 9th-level spell cast by an appropriate spellcaster.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Stabling (per day)
+- category: Services
+- rarity: common
+- price: 5 sp
+- weight: —
+- description: Shelter, feed, and care for one mount for a day.
+- effect: Provides care and shelter for one mount for a day.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Bread (loaf)
+- category: Services
+- rarity: common
+- price: 2 cp
+- weight: —
+- description: A fresh loaf of bread from a local baker.
+- effect: Provides basic nourishment.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Cheese (wedge)
+- category: Services
+- rarity: common
+- price: 1 sp
+- weight: —
+- description: A wedge of hard cheese.
+- effect: Provides flavorful nourishment.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Meal (Squalid)
+- category: Services
+- rarity: common
+- price: 1 cp
+- weight: —
+- description: Thin gruel or scraps fit for squalid living.
+- effect: Provides minimal nourishment.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Meal (Poor)
+- category: Services
+- rarity: common
+- price: 2 cp
+- weight: —
+- description: A simple stew or porridge suitable for the poor.
+- effect: Provides basic nourishment.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Meal (Wealthy)
+- category: Services
+- rarity: common
+- price: 3 sp
+- weight: —
+- description: A well‑prepared multi‑course meal.
+- effect: Provides excellent nourishment and satisfaction.
+- attunement: no
+- consumable: yes
+- source: Free PHB
+
+Meal (Aristocratic)
+- category: Services
+- rarity: common
+- price: 6 sp
+- weight: —
+- description: A gourmet feast fit for nobility.
+- effect: Provides exquisite nourishment and culinary experience.
+- attunement: no
+- consumable: yes
+- source: Free PHB
