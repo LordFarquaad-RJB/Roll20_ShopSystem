@@ -1,7 +1,7 @@
 /**
  * ShopSystem.js
  * D&D 5e Shop System for Roll20
- * Version: 1.0.1
+ * Version: 1.0.0
  * 
  * This system handles shop management, item database, and transactions
  * for D&D 5e games in Roll20. It provides a complete interface for
@@ -69,7 +69,7 @@ const CONFIG = {
         ITEM: {
             DEFAULT_CATEGORY: "equipment",
             DEFAULT_RARITY: "common",
-            CATEGORIES: ["weapons", "armor", "equipment", "potions", "scrolls", "magic"],
+            CATEGORIES: ["weapons", "Armor & Attire", "equipment", "potions", "scrolls", "magic", "Mounts & Vehicles", "Services"],
             RARITIES: ["common", "uncommon", "rare", "very rare", "legendary"]
         },
         
@@ -104,11 +104,13 @@ const CONFIG = {
         CATEGORY: {
             EMOJI: {
                 weapons: "⚔️",
-                armor: "🛡️",
+                "Armor & Attire": "🛡️",
                 potions: "🧪",
                 scrolls: "📜",
                 magic: "✨",
-                equipment: "🎒"
+                equipment: "🎒",
+                "Mounts & Vehicles": "🐴🛞",
+                Services: "🛎️"
             }
         },
 
@@ -119,7 +121,7 @@ const CONFIG = {
                 name: "Weapons",
                 priority: 1
             },
-            armor: {
+            "Armor & Attire": { // Corrected key
                 emoji: "🛡️",
                 name: "Armor & Attire",
                 priority: 2,
@@ -139,7 +141,19 @@ const CONFIG = {
                 emoji: "🎒",
                 name: "Equipment & Gear",
                 priority: 5
-            }
+            },
+            "Mounts & Vehicles": { // Corrected key
+                emoji: "🐴", // Consider updating if you have a combined emoji like in CATEGORY.EMOJI
+                name: "Mounts & Vehicles",
+                priority: 6,
+                identifiers: ["mount", "horse", "pony", "donkey", "mule", "cart", "wagon", "vehicle", "carriage"]
+            },
+            "Services": { // Corrected key
+                emoji: "🛎️", // Consider updating if you have a combined emoji
+                name: "Services",
+                priority: 7,
+                identifiers: ["service", "meal", "inn stay", "spellcasting", "hireling", "stabling", "wine", "ale"]
+            },
         },
 
         // Added rarity display configuration
@@ -196,20 +210,23 @@ const CONFIG = {
         // Not used by: Basic Generator (uses explicit category parameter).
         SHOP_TYPE_WEIGHTS: {
             "General Store": {
-                equipment: 40,
+                equipment: 30,
                 weapons: 20,
-                armor: 20,
-                potions: 10,
-                scrolls: 5,
-                magic: 5
+                "Armor & Attire": 20,
+                potions: 13,
+                scrolls: 1,
+                magic: 1,
+                "Mounts & Vehicles": 5,
+                Services: 10
             },
             "Blacksmith": {
-                weapons: 50,
-                armor: 40,
-                equipment: 10
+                weapons: 45,
+                "Armor & Attire": 35,
+                equipment: 10,
+                "Mounts & Vehicles": 5
             },
             "Armorer": {
-                armor: 70,
+                "Armor & Attire": 70,
                 equipment: 20,
                 weapons: 10
             },
@@ -219,9 +236,10 @@ const CONFIG = {
                 equipment: 10
             },
             "Magic Shop": {
-                magic: 50,
+                magic: 30,
                 scrolls: 25,
-                potions: 25
+                potions: 25,
+                Services: 10
             },
             "Potion Shop": {
                 potions: 80,
@@ -229,34 +247,40 @@ const CONFIG = {
                 scrolls: 5
             },
             "Scroll Shop": {
-                scrolls: 80,
+                scrolls: 75,
                 magic: 15,
-                potions: 5
+                potions: 5,
+                Services: 5
             },
             "Tavern": {
-                equipment: 60,
-                potions: 30,
-                weapons: 10
+                equipment: 25,
+                potions: 20,
+                weapons: 5,
+                Services: 60
             },
             "Jeweler": {
-                magic: 40,
-                equipment: 60
+                magic: 20,
+                "Armor & Attire": 40,
+                equipment: 40
             },
             "Clothier": {
-                equipment: 80,
-                armor: 20
+                equipment: 50,
+                "Armor & Attire": 50
             },
             "Adventuring Supplies": {
-                equipment: 50,
+                equipment: 45,
                 weapons: 20,
-                armor: 20,
-                potions: 10
+                "Armor & Attire": 20,
+                potions: 10,
+                "Mounts & Vehicles": 10
             },
             "Exotic Goods": {
                 magic: 30,
-                equipment: 30,
-                weapons: 20,
-                armor: 20
+                equipment: 25,
+                weapons: 15,
+                "Armor & Attire": 15,
+                "Mounts & Vehicles": 10,
+                Services: 5
             }
         },
             
@@ -296,7 +320,7 @@ const CONFIG = {
             // [TAG: CD_CHANCE_GENERATOR_LEGENDARY] Base chance (percentage) for any legendary item to generate.
             // Used ONLY by: Chance-Based Generator (combined with rarityBonus to modify legendary quantity roll success rate).
             // Not used by: Basic or Advanced Generators.
-            BASE_LEGENDARY_CHANCE: 50, // 50% chance
+            BASE_LEGENDARY_CHANCE: 5, // 50 = 50% chance
             // [REMOVED: Original QUANTITY_RANGES section] Duplicate of CONFIG.STOCK.DEFAULT_QUANTITY above.
             // [REMOVED: Original MIN_STOCK section] Was unused in the code.
         },
@@ -406,6 +430,45 @@ const ShopSystem = {
                 // Default whisper to GM if no target player specified
                 sendChat("ShopSystem", `/w gm ${message}`);
             }
+        },
+        
+        // [TAG: UTIL_PARSE_COMMAND_ARGS]
+        parseCommandArgs: function(commandString) {
+            const args = [];
+            let inQuote = false;
+            let currentArg = '';
+            const trimmedCommandString = commandString.trim();
+
+            for (let i = 0; i < trimmedCommandString.length; i++) {
+                const char = trimmedCommandString[i];
+
+                if (char === '\"') {
+                    inQuote = !inQuote;
+                    if (!inQuote) { 
+                        args.push(currentArg); 
+                        currentArg = '';
+                    } else { 
+                        if (currentArg !== '') {
+                            args.push(currentArg);
+                            currentArg = '';
+                        }
+                    }
+                    continue; 
+                }
+
+                if (char === ' ' && !inQuote) {
+                    if (currentArg !== '') {
+                        args.push(currentArg);
+                        currentArg = '';
+                    }
+                } else {
+                    currentArg += char;
+                }
+            }
+            if (currentArg !== '') {
+                args.push(currentArg);
+            }
+            return args;
         },
 
         // [TAG: SHOP_6] - Fixed GM detection
@@ -1062,9 +1125,19 @@ const ShopSystem = {
                 item.rarity = CONFIG.ITEM.DEFAULT_RARITY;
             }
             
-            // Ensure category is valid
-            if (!item.category || !CONFIG.ITEM.CATEGORIES.includes(item.category)) {
+            // Ensure category is valid (case-insensitive check and assignment of canonical name)
+            if (!item.category) {
                 item.category = CONFIG.ITEM.DEFAULT_CATEGORY;
+            } else {
+                const lowerCaseItemCategory = item.category.toLowerCase();
+                const foundCategory = CONFIG.ITEM.CATEGORIES.find(
+                    cfgCategory => cfgCategory.toLowerCase() === lowerCaseItemCategory
+                );
+                if (foundCategory) {
+                    item.category = foundCategory; // Assign the canonical name from CONFIG
+                } else {
+                item.category = CONFIG.ITEM.DEFAULT_CATEGORY;
+                }
             }
             
             return item;
@@ -1159,22 +1232,19 @@ const ShopSystem = {
         },
 
         // [TAG: DB_19_SHOP_X_LIST_ITEMS] // Need SHOP list item tag
-        listItems: function(category, rarity) {
+        listItems: function(category, rarity) { // category can be "Weapons", rarity can be "common"
             const handout = findObjs({ _type: "handout", name: CONFIG.HANDOUT.DATABASE })[0];
             
             if (!handout) {
                 ShopSystem.utils.chat("❌ Item database not found! Initialize it with !itemdb init");
-                return [];
+                return Promise.resolve([]); // Return a resolved promise with empty array
             }
             
             // Get handout data
             return new Promise((resolve, reject) => {
                 handout.get("gmnotes", function(notes) {
                     try {
-                        // Clean up the notes
                         const cleanNotes = ShopSystem.utils.cleanHandoutNotes(notes);
-                        
-                        // Parse the data
                         const data = JSON.parse(cleanNotes);
                         
                         if (!data || !data.items) {
@@ -1183,46 +1253,73 @@ const ShopSystem = {
                             return;
                         }
 
+                        // Normalize category and rarity inputs to lowercase, unless they are 'all'
+                        const effectiveCategory = (category && category.toLowerCase() !== 'all') ? category.toLowerCase() : 'all';
+                        const effectiveRarity = (rarity && rarity.toLowerCase() !== 'all') ? rarity.toLowerCase() : 'all';
+                        // Log what is being used for lookup
+                        ShopSystem.utils.log(`listItems lookup: effectiveCategory='${effectiveCategory}', effectiveRarity='${effectiveRarity}' (Originals: category='${category}', rarity='${rarity}')`, 'debug');
+
+                        // ... (after effectiveCategory and effectiveRarity are defined) ...
                         let items = [];
-                        
-                        // Handle different combinations of category and rarity
-                        if (category === 'all' && rarity === 'all') {
-                            // Return all items from all categories and rarities
-                            Object.keys(data.items).forEach(r => {
-                                Object.keys(data.items[r]).forEach(c => {
-                                    if (Array.isArray(data.items[r][c])) {
-                                        items = items.concat(data.items[r][c]);
-                                    }
-                                });
+                        if (!data || !data.items) { // Added safety check for data.items
+                            ShopSystem.utils.log(`listItems: Database structure (data.items) is missing or invalid.`, "error");
+                        } else if (effectiveCategory === "all" && effectiveRarity === "all") {
+                            Object.keys(data.items).forEach(rar => {
+                                if (data.items[rar]) { 
+                                    Object.keys(data.items[rar]).forEach(cat => {
+                                        if (data.items[rar][cat]) { 
+                                            items = items.concat(data.items[rar][cat]);
+                                        }
+                                    });
+                                }
                             });
-                        } else if (category === 'all') {
-                            // Return all items from specified rarity
-                            if (data.items[rarity]) {
-                                Object.keys(data.items[rarity]).forEach(c => {
-                                    if (Array.isArray(data.items[rarity][c])) {
-                                        items = items.concat(data.items[rarity][c]);
+                        } else if (effectiveCategory === "all") {
+                            // Filter by rarity only, across all categories
+                            if (data.items[effectiveRarity]) {
+                                Object.keys(data.items[effectiveRarity]).forEach(cat => {
+                                    if (data.items[effectiveRarity][cat]) { 
+                                        items = items.concat(data.items[effectiveRarity][cat]);
                                     }
                                 });
                             }
-                        } else if (rarity === 'all') {
-                            // Return all items from specified category across all rarities
-                            Object.keys(data.items).forEach(r => {
-                                if (data.items[r][category] && Array.isArray(data.items[r][category])) {
-                                    items = items.concat(data.items[r][category]);
-                                }
-                            });
+                        } else if (effectiveRarity === "all") {
+                            // Filter by category only, across all rarities
+                            const canonicalCategoryToLookup = CONFIG.ITEM.CATEGORIES.find(c => c.toLowerCase() === effectiveCategory);
+                            if (canonicalCategoryToLookup) {
+                                Object.keys(data.items).forEach(rar => {
+                                    if (data.items[rar] && data.items[rar][canonicalCategoryToLookup]) {
+                                        items = items.concat(data.items[rar][canonicalCategoryToLookup]);
+                                    }
+                                });
+                            } else if (effectiveCategory !== "all") { 
+                                ShopSystem.utils.log(`listItems: Unknown category requested for filtering: ${category}`, "warn");
+                            }
                         } else {
-                            // Return specific category and rarity
-                            if (data.items[rarity]?.[category] && Array.isArray(data.items[rarity][category])) {
-                                items = data.items[rarity][category];
+                            // Filter by specific category and rarity
+                            const canonicalCategoryToLookup = CONFIG.ITEM.CATEGORIES.find(c => c.toLowerCase() === effectiveCategory);
+                            if (canonicalCategoryToLookup) {
+                                if (data.items[effectiveRarity] && data.items[effectiveRarity][canonicalCategoryToLookup]) {
+                                    items = data.items[effectiveRarity][canonicalCategoryToLookup] || []; 
+                                } else {
+                                    items = []; 
+                                }
+                            } else if (effectiveCategory !== "all") { 
+                                ShopSystem.utils.log(`listItems: Unknown category requested for filtering: ${category}`, "warn");
+                                items = []; 
                             }
                         }
 
-                        ShopSystem.utils.log(`Found ${items.length} items matching criteria (category: ${category}, rarity: ${rarity})`, 'info');
+                        // Ensure items is always an array, even if nothing found or path was bad
+                        if (!Array.isArray(items)) {
+                            items = [];
+                        }
+
+                        // Use original category/rarity for logging the match, or effective ones if preferred for clarity
+                        ShopSystem.utils.log(`Found ${items.length} items matching criteria (request: category=${category}, rarity=${rarity}; lookup: cat=${effectiveCategory}, rar=${effectiveRarity})`, 'info');
                         resolve(items);
                     } catch (error) {
-                        ShopSystem.utils.log(`Error parsing database: ${error.message}`, "error");
-                        reject(`Error parsing database: ${error.message}`);
+                        ShopSystem.utils.log(`Error parsing database in listItems: ${error.message}`, "error");
+                        reject(`Error parsing database: ${error.message}`); // Keep reject for promise chain
                     }
                 });
             });
@@ -1259,32 +1356,69 @@ const ShopSystem = {
                     }
                     break;
                 case "list":
-                    const category = args.length > 1 ? args[1].toLowerCase() : 'all';
-                    const rarity = args.length > 2 ? ShopSystem.utils.normalizeRarity(args[2]) : 'all';
-                    // Check for the force flag as the fourth argument
-                    const forceDisplayFlag = args.length > 3 && args[3].toLowerCase() === 'force';
+                    // Original args: e.g., ["list", "Armor", "&", "Attire", "All"] from !itemdb list Armor & Attire All
+                    // or ["list", "Weapons", "Common"] from !itemdb list Weapons Common
+                    // or ["list", "All", "All"] from !itemdb list All All
+
+                    let categoryArgIndex = 1;
+                    let categoryToValidate = "";
+                    let rarityArgIndex = -1; // Will be determined after category
+
+                    if (args.length > 1) {
+                        let potentialCategory = args[categoryArgIndex]; // e.g., "Armor" or "Weapons" or "All"
+                        
+                        // Check if this could be a multi-word category
+                        for (const knownCat of CONFIG.ITEM.CATEGORIES) {
+                            const knownCatParts = knownCat.split(' ');
+                            if (knownCatParts.length > 1 && knownCatParts[0].toLowerCase() === potentialCategory.toLowerCase()) {
+                                // Potential multi-word category found
+                                let assembledCategory = args.slice(categoryArgIndex, categoryArgIndex + knownCatParts.length).join(' ');
+                                // Check if the assembled string matches a known multi-word category (case-insensitive)
+                                if (assembledCategory.toLowerCase() === knownCat.toLowerCase()) {
+                                    potentialCategory = knownCat; // Use the canonical form
+                                    rarityArgIndex = categoryArgIndex + knownCatParts.length;
+                                    break;
+                                }
+                            }
+                        }
+                        // If it wasn't a multi-word category, or loop didn't break
+                        if (rarityArgIndex === -1) {
+                                rarityArgIndex = categoryArgIndex + 1; // Assume single word category
+                        }
+                        categoryToValidate = potentialCategory;
+                    } else {
+                        categoryToValidate = 'all'; // No category arg provided
+                    }
                     
-                    const validCategories = [...CONFIG.ITEM.CATEGORIES, 'all'];
-                    const validRarities = [...CONFIG.ITEM.RARITIES, 'all'];
+                    const category = categoryToValidate.toLowerCase(); // Now category should be "armor & attire" or "weapons" or "all"
+                    const rarity = args.length > rarityArgIndex && rarityArgIndex !== -1 ? ShopSystem.utils.normalizeRarity(args[rarityArgIndex]) : 'all';
+                    const forceDisplayFlag = args.length > rarityArgIndex + 1 && rarityArgIndex !== -1 && args[rarityArgIndex + 1].toLowerCase() === 'force';
+
+                    const validCategories = [...CONFIG.ITEM.CATEGORIES.map(c => c.toLowerCase()), 'all']; // Compare with lowercase
+                    const validRarities = [...CONFIG.ITEM.RARITIES.map(r => r.toLowerCase()), 'all'];
                     
                     if (!validCategories.includes(category)) {
-                        ShopSystem.utils.chat(`❌ Invalid category: ${category}. Valid categories are: ${validCategories.join(', ')}`, playerID);
+                        // Get canonical names for error message
+                        const displayValidCategories = [...CONFIG.ITEM.CATEGORIES, 'all'];
+                        ShopSystem.utils.chat(`❌ Invalid category: ${categoryToValidate}. Valid categories are: ${displayValidCategories.join(', ')}`, playerID);
                         return;
                     }
                     
-                    if (!validRarities.includes(rarity)) {
-                        ShopSystem.utils.chat(`❌ Invalid rarity: ${rarity}. Valid rarities are: ${validRarities.join(', ')}`, playerID);
+                    if (!validRarities.includes(rarity.toLowerCase())) { // ensure rarity is lowercased for check
+                            const displayValidRarities = [...CONFIG.ITEM.RARITIES, 'all'];
+                        ShopSystem.utils.chat(`❌ Invalid rarity: ${args[rarityArgIndex]}. Valid rarities are: ${displayValidRarities.join(', ')}`, playerID);
                         return;
                     }
                     
-                    this.listItems(category, rarity).then(items => {
+                    // Use the canonical category name for listItems if it was a multi-word one
+                    const canonicalCategoryToList = CONFIG.ITEM.CATEGORIES.find(c => c.toLowerCase() === category) || category;
+
+                    this.listItems(canonicalCategoryToList, rarity).then(items => {
                         if (items.length === 0) {
                             ShopSystem.utils.chat("No items found matching your criteria.", playerID);
                             return;
                         }
-                        
-                        // Pass the forceDisplayFlag to displayItemsList
-                        this.displayItemsList(items, category, rarity, playerID, forceDisplayFlag);
+                        this.displayItemsList(items, canonicalCategoryToList, rarity, playerID, forceDisplayFlag);
                     }).catch(error => {
                         ShopSystem.utils.chat(`❌ Error listing items: ${error}`, playerID);
                     });
@@ -1342,7 +1476,8 @@ const ShopSystem = {
                 "&{template:default}",
                 "{{name=📚 Item Database Help}}",
                 "{{About=The Item Database system allows you to manage and organize items for your shops. Items are organized by category and rarity for easy access.}}",
-                "{{Categories=• Weapons\n• Armor\n• Equipment\n• Potions\n• Scrolls\n• Magic Items}}",
+                "{{Suggestions=It's recommended to import items to your item database on a seperate test game/campaign as the import is via the chat and it looks messy, you can then copy the handout over to your live game/campaign.}}",
+                "{{Categories=• Weapons\n• Armor & Attire\n• Equipment\n• Potions\n• Scrolls\n• Magic Items\n• Mounts & Vehicles\n• Services}}",
                 "{{Rarities=• Common\n• Uncommon\n• Rare\n• Very Rare\n• Legendary}}",
                 "{{Database Actions=",
                 "[📥 Start Import](!itemdb import) [⛔ End Import](!itemdb end)",
@@ -1378,6 +1513,10 @@ const ShopSystem = {
                 // Build category and rarity options for the filter prompt
                 const categoryOptions = ['All', ...CONFIG.ITEM.CATEGORIES.map(c => c.charAt(0).toUpperCase() + c.slice(1))].join('|');
                 const rarityOptions = ['All', ...CONFIG.ITEM.RARITIES.map(r => r === 'very rare' ? 'Very Rare' : r.charAt(0).toUpperCase() + r.slice(1))].join('|');
+
+                // Ensure category and rarity for "Show These" button are quoted if they contain spaces
+                const safeCategoryArgShowThese = category.includes(' ') ? `"${category}"` : category;
+                const safeRarityArgShowThese = rarity.includes(' ') ? `"${rarity}"` : rarity;
                 
                 const menuWarning = [
                     "&{template:default}",
@@ -1500,14 +1639,17 @@ const ShopSystem = {
                 .map(cat => {
                     const emoji = categoryEmojis[cat] || "📦";
                     // Use the correct command and variables for itemdb listing
-                    return `[${emoji} ${cat.charAt(0).toUpperCase() + cat.slice(1)}](!itemdb list ${cat} ${rarity})`; 
+                    const categoryArg = cat.includes(' ') ? `"${cat}"` : cat; // Quote if space
+                    const rarityArg = rarity.includes(' ') ? `"${rarity}"` : rarity; // Quote if space (for safety)
+                    return `[${emoji} ${cat.charAt(0).toUpperCase() + cat.slice(1)}](!itemdb list ${categoryArg} ${rarityArg})`; 
                 })
                 .join(" ");
             menu.push(categoryLinks);
 
             // Add "All Categories" button only if it's not the current filter
             if (category !== 'all') {
-                menu.push(` [📦 All Categories](!itemdb list all ${rarity})`); 
+                const rarityArg = rarity.includes(' ') ? `"${rarity}"` : rarity; // Quote if space
+                menu.push(` [📦 All Categories](!itemdb list all ${rarityArg})`); 
             }
             menu.push("}}");
             
@@ -1526,14 +1668,16 @@ const ShopSystem = {
                     const emoji = rarityEmojis[rar] || "⚪";
                     const rarityLabel = rar === 'very rare' ? 'Very Rare' : rar.charAt(0).toUpperCase() + rar.slice(1); // Handle Very Rare capitalization
                     // Use the correct command and variables for itemdb listing
-                    return `[${emoji} ${rarityLabel}](!itemdb list ${category} ${rar})` 
+                    const categoryArg = category.includes(' ') ? `"${category}"` : category; // Quote if space
+                    return `[${emoji} ${rarityLabel}](!itemdb list ${categoryArg} ${rar})`  
                 })
                 .join(" ");
             menu.push(rarityButtons);
 
             // Add "All Rarities" button only if it's not the current filter
             if (rarity !== 'all') {
-                menu.push(` [🏳️‍🌈 All Rarities](!itemdb list ${category} all)`); 
+                const categoryArg = category.includes(' ') ? `"${category}"` : category; // Quote if space
+                menu.push(` [🏳️‍🌈 All Rarities](!itemdb list ${categoryArg} all)`); 
             }
             menu.push("}}");
             
@@ -1576,7 +1720,7 @@ const ShopSystem = {
                     price: { gp: 75 },
                     weight: 55,
                     ac: 16,
-                    category: "armor",
+                    category: "Armor & Attire",
                     type: "heavy",
                     rarity: "common"
                 }
@@ -1642,7 +1786,8 @@ const ShopSystem = {
 
                     switch (prop.toLowerCase()) {
                         case 'price':
-                            const priceMatch = value.match(/(\d+(?:\.\d+)?)\s*(cp|sp|ep|gp|pp)/);
+                            const cleanedValue = value.replace(/,/g, '');
+                            const priceMatch = cleanedValue.match(/(\d+(?:\.\d+)?)\s*(cp|sp|ep|gp|pp)/);
                             if (priceMatch) {
                                 const [_, amount, currency] = priceMatch;
                                 // Convert floating-point prices (e.g., "0.5 gp") correctly
@@ -1683,12 +1828,12 @@ const ShopSystem = {
                                     // Handle integer values
                                     currentItem.price[currency] = parseInt(amount);
                                 }
-                            } else if (value.toLowerCase() === 'free' || value === '0') {
+                            } else if (cleanedValue.toLowerCase() === 'free' || cleanedValue === '0') {
                                 // Handle "free" or "0" items
                                 currentItem.price = { gp: 0 };
                             } else {
                                 // Try to parse a simple number as gold pieces
-                                const simplePrice = parseFloat(value);
+                                const simplePrice = parseFloat(cleanedValue);
                                 if (!isNaN(simplePrice)) {
                                     const goldPart = Math.floor(simplePrice);
                                     const silverPart = Math.floor((simplePrice - goldPart) * 10);
@@ -2389,11 +2534,13 @@ const ShopSystem = {
                             },
                             inventory: {
                                 weapons: [],
-                                armor: [],
+                                "Armor & Attire": [],
                                 potions: [],
                                 scrolls: [],
                                 magic: [],
-                                equipment: []
+                                equipment: [],
+                                "Mounts & Vehicles": [],
+                                Services: []
                             }
                         };
 
@@ -2434,11 +2581,13 @@ const ShopSystem = {
                             },
                             inventory: {
                                 weapons: [],
-                                armor: [],
+                                "Armor & Attire": [],
                                 potions: [],
                                 scrolls: [],
                                 magic: [],
-                                equipment: []
+                                equipment: [],
+                                "Mounts & Vehicles": [],
+                                Services: []
                             }
                         };
                         
@@ -2484,6 +2633,14 @@ const ShopSystem = {
                         return;
                     }
                     handleSetParameter(args[1], args.slice(2).join(" "), "location");
+                    break;
+
+                case "set_haggle_attempts":
+                    if (args.length < 3) {
+                        ShopSystem.utils.chat("❌ Missing parameters", playerID);
+                        return;
+                    }
+                    handleSetParameter(args[1], args.slice(2).join(" "), "haggle_attempts");
                     break;
                     
                 case "set_personality":
@@ -2563,10 +2720,6 @@ const ShopSystem = {
                         ShopSystem.utils.chat("❌ Missing parameters for advanced setup", playerID);
                         return;
                     }
-
-
-                    
-                    // Process command with special handling for shop names with spaces
                     {
                         const fullCommand = msg.content;
                         let setupShopName, setupParam, setupValue;
@@ -2619,20 +2772,66 @@ const ShopSystem = {
                     }
                     // Join remaining args to handle spaces in shop names
                     const shopToOpen = args.slice(1).join(" ");
--                    this.SHPDIS_MD_ShowShopMenu(shopToOpen, playerID, msg);
-+                    // Call with forcePublicDisplay = false
-+                    this.SHPDIS_MD_ShowShopMenu(shopToOpen, msg.playerid, msg, false);
+                    // Call with forcePublicDisplay = false 
+                    this.SHPDIS_MD_ShowShopMenu(shopToOpen, msg.playerid, msg, false); 
                     break;
                     
+                // [TAG: BROWSE_MULTIWORD_CATEGORY_FIX]
                 case "browse":
-                    if (args[1]) { // Corrected index from args[2] to args[1]
-                        const category = args[1].toLowerCase();
-                        // GM check removed, as both GM and Player use this now
-                        // Call the new function to display shop category items
-                        this.STKACT_MD_ShowShopCategoryItems(category, playerID);
-                    } else {
-                        ShopSystem.utils.chat('❌ Please specify a category: weapons, armor, potions, scrolls, magic, equipment, or all');
+                    if (args.length < 2) { // Need at least "browse" + category part
+                        ShopSystem.utils.chat("❌ Please specify a category to browse.", playerID);
+                        return;
                     }
+
+                    // Reconstruct category name from args, starting from index 1
+                    // Example args: ["browse", "Armor", "&", "Attire"] or ["browse", "Weapons"] or ["browse", "All"]
+                    let categoryToBrowse = "";
+                    let potentialCategoryParts = args.slice(1); // All parts after "browse"
+                    let matchedKnownCategory = false;
+
+                    // Try to match longest known category first (e.g. "Mounts & Vehicles" before "Mounts")
+                    // This loop assumes CONFIG.ITEM.CATEGORIES are the canonical names to match against
+                    for (const knownCat of CONFIG.ITEM.CATEGORIES.slice().sort((a,b) => b.length - a.length)) { // Sort by length desc
+                        const knownCatParts = knownCat.split(' ');
+                        if (potentialCategoryParts.length >= knownCatParts.length) {
+                            let tempCategory = potentialCategoryParts.slice(0, knownCatParts.length).join(' ');
+                            if (tempCategory.toLowerCase() === knownCat.toLowerCase()) {
+                                categoryToBrowse = knownCat; // Use canonical (mixed-case) name
+                                matchedKnownCategory = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // If no multi-word known category matched, try to see if the first part is "all" or a single-word known category
+                    if (!matchedKnownCategory) {
+                        let firstPart = potentialCategoryParts[0];
+                        if (firstPart) {
+                            if (firstPart.toLowerCase() === "all") {
+                                categoryToBrowse = "all";
+                    } else {
+                                // Check if the first part is a known single-word category
+                                const foundSingle = CONFIG.ITEM.CATEGORIES.find(cfgCat => cfgCat.toLowerCase() === firstPart.toLowerCase());
+                                if (foundSingle) {
+                                    categoryToBrowse = foundSingle; // Use canonical
+                                } else {
+                                    // Fallback: join all parts, this might be a typo or an unknown category
+                                    categoryToBrowse = potentialCategoryParts.join(" ");
+                                }
+                            }
+                        }
+                    }
+
+                    if (!categoryToBrowse) {
+                        ShopSystem.utils.chat("❌ Could not determine category to browse.", playerID);
+                        return;
+                    }
+
+                    ShopSystem.utils.log(`Browsing shop category: '${categoryToBrowse}' (Raw args after browse: ${JSON.stringify(args.slice(1))})`, "debug");
+                    
+                    // STKACT_MD_ShowShopCategoryItems should handle 'all' and validate known categories
+                    // It expects the canonical category name.
+                    this.STKACT_MD_ShowShopCategoryItems(categoryToBrowse, playerID);
                     break;
                     
                 case "sample":
@@ -2673,7 +2872,7 @@ const ShopSystem = {
                         }
                     }
                     break;
-                    
+
                 case "stock":
                     // Route to stock management, passing the full msg object
                     this.STKACT_CMD_HandleStockCommand(args.slice(1), playerID, msg);
@@ -3062,11 +3261,13 @@ const ShopSystem = {
                 },
                 inventory: {
                     weapons: [],
-                    armor: [],
+                    "Armor & Attire": [],
                     potions: [],
                     scrolls: [],
                     magic: [],
-                    equipment: []
+                    equipment: [],
+                    "Mounts & Vehicles": [],
+                    Services: []
                 }
             };
             
@@ -3109,14 +3310,14 @@ const ShopSystem = {
                                 }
                                 
                                 // Try to add armor
-                                const armor = await ShopSystem.database.listItems('armor', 'common');
-                                if (armor.length > 0) {
-                                    shopData.inventory.armor.push({
-                                        id: armor[0].id,
-                                        name: armor[0].name,
+                                const armorItems = await ShopSystem.database.listItems('Armor & Attire', 'common');
+                                if (armorItems.length > 0) {
+                                    shopData.inventory["Armor & Attire"].push({
+                                        id: armorItems[0].id,
+                                        name: armorItems[0].name,
                                         quantity: 1,
                                         maxStock: 1, // Added maxStock
-                                        price: armor[0].price
+                                        price: armorItems[0].price
                                     });
                                 }
                                 
@@ -3211,7 +3412,7 @@ const ShopSystem = {
                     "&{template:default}",
                     "{{name=🏪 Shop Help (GM)}}",
                     "{{About=The Shop System allows you to create and manage shops. Use the commands below to interact.}}",
-                    "{{Basic Commands=• !shop list - Show all available shops\n• !shop open [name] - Open a shop menu\n• !shop browse [category] - Browse items in a category (weapons, armor, potions, scrolls, magic, equipment)\n• !shop sample - Create a sample shop with stock}}",
+                    "{{Basic Commands=• !shop list - Show all available shops\n• !shop open [name] - Open a shop menu\n• !shop browse [category] - Browse items in a category (weapons, 'Armor & Attire', potions, scrolls, magic, equipment, 'Mounts & Vehicles', Services)\n• !shop sample - Create a sample shop with stock}}",
                     "{{Advanced Setup=• !shop create_advanced [name] - Start interactive setup\n• !shop adv_setup [name] [param] [value] - Set a specific parameter\n• !shop adv_complete [name] - Complete the advanced setup}}",
                     "{{Special Events=• Bulk Discount - Buy X get Y free\n• Category Sale - Discount on a category\n• Limited Time Sale - Temporary price reduction\n• Loyalty Program - Return customer benefits}}",
                     "{{Shop Management=• !shop edit [name] - Edit shop details\n• !shop stock [name] - Manage inventory\n• !shop random [name] - Generate random stock}}",
@@ -3297,11 +3498,13 @@ const ShopSystem = {
                         "{{Categories=",
                         `[📦 All Items](!shop browse all)`,
                         `[${CONFIG.DISPLAY.CATEGORY.EMOJI.weapons} Weapons](!shop browse weapons)`,
-                        `[${CONFIG.DISPLAY.CATEGORY.EMOJI.armor} Armor](!shop browse armor)`,
+                        `[${CONFIG.DISPLAY.CATEGORY.EMOJI["Armor & Attire"]} Armor & Attire](!shop browse Armor & Attire)`,
                         `[${CONFIG.DISPLAY.CATEGORY.EMOJI.potions} Potions](!shop browse potions)`,
                         `[${CONFIG.DISPLAY.CATEGORY.EMOJI.scrolls} Scrolls](!shop browse scrolls)`,
                         `[${CONFIG.DISPLAY.CATEGORY.EMOJI.magic} Magic Items](!shop browse magic)`,
                         `[${CONFIG.DISPLAY.CATEGORY.EMOJI.equipment} Equipment](!shop browse equipment)`,
+                        `[${CONFIG.DISPLAY.CATEGORY.EMOJI["Mounts & Vehicles"]} Mounts & Vehicles](!shop browse Mounts & Vehicles)`,
+                        `[${CONFIG.DISPLAY.CATEGORY.EMOJI.Services} Services](!shop browse Services)`,
                         "}}",
                         "{{Actions=",
                         "[🧺 View Basket](!shop basket view) ",
@@ -3522,10 +3725,12 @@ const ShopSystem = {
                 ...locationNames.filter(name => name !== current.location)
             ].join('|');
             
-            const merchantTypeOptions = merchantTypes.map(type => {
-                const name = typeof type === 'string' ? type : (type.name || '');
-                return name === current.merchant_type ? `${name}|${name}` : name;
-            }).join('|');
+            // Remove duplicate merchant personality options
+            const uniqueMerchantTypes = [...new Set(merchantTypes.map(type => typeof type === 'string' ? type : (type.name || '')))];
+            const merchantTypeOptions = [
+                current.merchant_type,
+                ...uniqueMerchantTypes.filter(name => name !== current.merchant_type)
+            ].join('|');
             
             const specialEventOptions = specialEvents.map(event => {
                 const name = typeof event === 'string' ? event : (event.name || '');
@@ -3752,11 +3957,13 @@ const ShopSystem = {
                                     // Initialize empty inventory
                                     shopData.inventory = {
                                         weapons: [],
-                                        armor: [],
+                                        "Armor & Attire": [],
                                         potions: [],
                                         scrolls: [],
                                         magic: [],
-                                        equipment: []
+                                        equipment: [],
+                                        "Mounts & Vehicles": [],
+                                        Services: []
                                     };
                                 }
                                 
@@ -3798,11 +4005,13 @@ const ShopSystem = {
                     // Create a new shop with empty inventory
                     shopData.inventory = {
                     weapons: [],
-                    armor: [],
+                    "Armor & Attire": [],
                     potions: [],
                     scrolls: [],
                     magic: [],
-                    equipment: []
+                    equipment: [],
+                    "Mounts & Vehicles": [],
+                    Services: []
             };
             
                     // Create new shop
@@ -3841,7 +4050,7 @@ const ShopSystem = {
 
             // Build category filter buttons
             // Define custom order for display
-            const categoryOrder = ['weapons', 'armor', 'equipment', 'magic', 'potions', 'scrolls'];
+            const categoryOrder = ['weapons', 'Armor & Attire', 'equipment', 'magic', 'potions', 'scrolls', 'Mounts & Vehicles', 'Services'];
             let categoryButtons = categoryOrder.map(cat => {
                 const emoji = categoryEmojis[cat] || "📦";
                 return `[${emoji} ${cat.charAt(0).toUpperCase() + cat.slice(1)}](!shop stock filter_add ${cat} all)`; 
@@ -3914,6 +4123,10 @@ const ShopSystem = {
                     ShopSystem.utils.log(`Warning: Item count (${items.length}) exceeds threshold (${displayThreshold}) for filter (Cat: '${categoryToShow}', Rar: '${rarityToShow}'). Showing warning menu.`, 'info');
                     const categoryOptions = ['All', ...CONFIG.ITEM.CATEGORIES.map(c => c.charAt(0).toUpperCase() + c.slice(1))].join('|');
                     const rarityOptions = ['All', ...CONFIG.ITEM.RARITIES.map(r => r.charAt(0).toUpperCase() + r.slice(1))].join('|');
+
+                    // Ensure category and rarity for "Show These" button are quoted if they contain spaces
+                    const safeCategoryArgShowThese = categoryToShow.includes(' ') ? `"${categoryToShow}"` : categoryToShow;
+                    const safeRarityArgShowThese = rarityToShow.includes(' ') ? `"${rarityToShow}"` : rarityToShow;
                     
                     const menuWarning = [
                         "&{template:default}",
@@ -4165,7 +4378,7 @@ const ShopSystem = {
                         stockLines.push(
                             `• ${itemDisplay}`,
                             // Ensure Edit/Remove buttons are properly indented and formatted
-                            `    [📝 Edit](!shop stock qty ${item.id}) [❌ Remove](!shop stock removeitem ${item.id})` 
+                            `[📝 Edit](!shop stock qty ${item.id}) [❌ Remove](!shop stock removeitem ${item.id})` 
                         );
                     });
                 }
@@ -4279,7 +4492,7 @@ const ShopSystem = {
                         // Always pass 'all' for rarity here, forceDisplay controls threshold bypass
                         this.STKMGM_MD_ShowItemToAdd(category, playerID, forceDisplay, 'all'); 
                     } else {
-                        ShopSystem.utils.chat("❌ Invalid category. Use: weapons, armor, potions, scrolls, magic, or equipment", playerID);
+                        ShopSystem.utils.chat("❌ Invalid category. Use: weapons, 'Armor & Attire', potions, scrolls, magic, equipment, 'Mounts & Vehicles', or Services", playerID);
                     }
                     break;
                     
@@ -4361,7 +4574,96 @@ const ShopSystem = {
                     }
                     this.STKACT_LOG_SetCurrentQuantity(setCurrentQtyItemId, setCurrentQtyValue, playerID);
                     break;
+                // [TAG: STOCK_FILTER_HANDLING]
+                case "filter_add":
+                case "filter_remove":
+                    // Args: [subCommand, categoryWord1, categoryWord2, ..., rarity, (optional)force]
+                    // Example: !shop stock filter_add Armor & Attire common force
+                    // Example: !shop stock filter_remove Weapons all
 
+                    if (args.length < 2) { // subcommand + at least a category
+                        ShopSystem.utils.chat("❌ Category and optionally rarity required for filter.", playerID);
+                        return;
+                    }
+
+                    let categoryParts = [];
+                    let rarityArg = "all"; // Default rarity
+                    let forceArg = false;
+                    let argIndex = 1; // Start after subCommand
+
+                    // Consume arguments for category until a rarity or 'force' is found
+                    while(argIndex < args.length) {
+                        const currentArgOriginal = args[argIndex]; // Keep original case for categoryParts
+                        const currentArgLower = currentArgOriginal.toLowerCase();
+                        const nextArgLower = (argIndex + 1 < args.length) ? args[argIndex+1].toLowerCase() : null;
+
+                        // Check if currentArgLower is a rarity
+                        if (CONFIG.ITEM.RARITIES.includes(currentArgLower) || currentArgLower === "all") {
+                            rarityArg = currentArgLower;
+                            argIndex++;
+                            // Check if next arg is 'force'
+                            if (argIndex < args.length && args[argIndex].toLowerCase() === 'force') {
+                                forceArg = true;
+                                argIndex++;
+                            }
+                            break; // Rarity (and possibly force) found
+                        }
+                        // Check if currentArgLower combined with nextArgLower is "very rare"
+                        else if (currentArgLower === "very" && nextArgLower === "rare") {
+                            rarityArg = "very rare";
+                            argIndex += 2;
+                            // Check if next arg is 'force'
+                            if (argIndex < args.length && args[argIndex].toLowerCase() === 'force') {
+                                forceArg = true;
+                                argIndex++;
+                            }
+                            break; // Rarity (and possibly force) found
+                        }
+                        // Check if currentArgLower is 'force' (can appear after category if rarity is default 'all')
+                        else if (currentArgLower === 'force' && categoryParts.length > 0) {
+                            forceArg = true;
+                            argIndex++;
+                            // If 'force' is found, the preceding parts were category, and rarity remains 'all'
+                            break; 
+                        }
+                        categoryParts.push(currentArgOriginal); // Add the original case part
+                        argIndex++;
+                    }
+
+                    let categoryToFilter = categoryParts.join(" ").trim();
+
+                    if (!categoryToFilter) {
+                        // This case should ideally be rare if parseCommandArgs correctly quotes multi-word args from buttons.
+                        // If it happens, it means the command was likely typed without quotes for a multi-word category
+                        // and only rarity/force was provided, or the command is malformed.
+                        // We could try to infer category from remaining args if any, but it's safer to error.
+                        ShopSystem.utils.chat("❌ Category not specified or improperly formatted for filter.", playerID);
+                        return;
+                    }
+                    
+                    const categoryToFilterLower = categoryToFilter.toLowerCase();
+
+                    ShopSystem.utils.log(`Stock Filter: cmd='${subCommand}', cat='${categoryToFilter}', rar='${rarityArg}', force='${forceArg}'`, "debug");
+
+                    // Validate category
+                    if (categoryToFilterLower !== "all" && !CONFIG.ITEM.CATEGORIES.map(c => c.toLowerCase()).includes(categoryToFilterLower)) {
+                        const validCats = CONFIG.ITEM.CATEGORIES.map(c => `"${c}"`).join(", ") + ", \"all\"";
+                        ShopSystem.utils.chat(`❌ Invalid category: "${categoryToFilter}". Valid categories are: ${validCats}`, playerID);
+                        return;
+                    }
+                    // Validate rarity
+                    if (!CONFIG.ITEM.RARITIES.includes(rarityArg) && rarityArg !== "all") {
+                        const validRars = CONFIG.ITEM.RARITIES.join(", ") + ", \"all\"";
+                        ShopSystem.utils.chat(`❌ Invalid rarity: "${rarityArg}". Valid rarities are: ${validRars}`, playerID);
+                        return;
+                    }
+
+                    if (subCommand === "filter_add") {
+                        this.STKMGM_MD_ShowItemToAdd(categoryToFilter, playerID, forceArg, rarityArg);
+                    } else { // filter_remove
+                        this.STKMGM_MD_ShowItemToRemove(categoryToFilter, playerID, rarityArg);
+                    }
+                    break;
                 // Random stock generation commands
                 case "random":
                     this.RDM_MD_ShowRandomStockMenu(playerID);
@@ -4636,6 +4938,10 @@ const ShopSystem = {
                     // [TAG: CD_RESTOCK_COMMAND_CASE]
                 case "restock":
                     this.RESTOCK_LOGIC_RestockShop(playerID);
+                    break;
+                    
+                case "review":
+                    this.RDM_MD_ShowRandomStkConfirmMenu(playerID);
                     break;
                     
                 default:
@@ -4963,7 +5269,7 @@ const ShopSystem = {
                 `[Set Custom](!shop stock adjust_qty ${index} ?{New Quantity|${item.quantity}})`,
                 "}}",
                 "{{Navigation=",
-                "[🔙 Back to Review](!shop stock reroll_all)",
+                "[🔙 Back to Review](!shop stock review)",
                 "}}",
                 item.quantity > 1 ?
                     "{{Note=Minimum quantity is 1. Reroll will generate new items while preserving any unselected quantity.}}" :
@@ -5241,7 +5547,7 @@ const ShopSystem = {
                         if (alt) {
                              pick = alt; // Assign the fallback item
                              ShopSystem.utils.log(`Advanced Gen: Fallback used for category ${selectedCategory}, picked ${pick.name} (${pick.rarity})`, 'debug');
-                         }
+                        }
                     }
 
                     // Add the picked item if found
@@ -6211,9 +6517,9 @@ const ShopSystem = {
             // Check for armor and wearables
             if (item.armorData || 
                 (item.description && item.description.includes("Armor Class")) ||
-                (CONFIG.DISPLAY.SELL_CATEGORIES.armor.identifiers && 
-                 CONFIG.DISPLAY.SELL_CATEGORIES.armor.identifiers.some(type => name.includes(type)))) {
-                return 'armor';
+                (CONFIG.DISPLAY.SELL_CATEGORIES["Armor & Attire"].identifiers && 
+                 CONFIG.DISPLAY.SELL_CATEGORIES["Armor & Attire"].identifiers.some(type => name.includes(type)))) {
+                return 'Armor & Attire';
             }
 
             // Check for scrolls
@@ -6224,6 +6530,31 @@ const ShopSystem = {
             // Check for potions
             if (name.includes('potion')) {
                 return 'potions';
+            }
+
+            // Check for Mounts & Vehicles
+            if (name.includes('mount') || 
+                name.includes('horse') || 
+                name.includes('pony') || 
+                name.includes('donkey') || 
+                name.includes('mule') || 
+                name.includes('cart') || 
+                name.includes('wagon') || 
+                name.includes('vehicle') ||
+                name.includes('carriage')) {
+                return 'Mounts & Vehicles';
+            }
+
+            // Check for Services
+            if (name.includes('service') || 
+                name.includes('meal') || 
+                name.includes('inn stay') || 
+                name.includes('spellcasting') || 
+                name.includes('hireling') ||
+                name.includes('stabling') ||
+                name.includes('wine') ||
+                name.includes('ale')) {
+                return 'Services';
             }
 
             // Default to equipment
@@ -7259,6 +7590,7 @@ const ShopSystem = {
             let buyAdjustmentCopper = 0;
             let sellAdjustmentCopper = 0;
              let originalBuyForReceipt = buyTotalCopper; // Keep pre-haggle buy total for receipt
+             let originalSellForReceipt = sellTotalCopper; // Default to pre-haggle sell total
 
             // Apply haggle adjustments stored in state
             if (state.ShopSystem.haggleResults && state.ShopSystem.haggleResults[playerId]?.applied) {
@@ -8467,7 +8799,7 @@ const ShopSystem = {
             const shop = ShopSystem.state.activeShop;
             const merchantType = shop?.merchant_type || CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE;
             const merchantConfig = CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === merchantType) ||
-                                     CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE; // Default personality
+                                     CONFIG.SHOP_SETTINGS.MERCHANT_TYPES.find(m => m.name === CONFIG.SHOP_SETTINGS.DEFAULTS.MERCHANT_TYPE); // Default personality
             const denialMessage = merchantConfig?.critFailure || "The merchant refuses to negotiate on the price."; // Use critFailure for flavor
 
             // Before building the playerMessage:
@@ -8665,7 +8997,7 @@ const ShopSystem = {
             let gmResultMessage = `&{template:default} {{name=${emoji} Haggle Result}}` +
                                 `{{Player=${playerName}}}` +
                                 `{{Skill=${skillType}}}` +
-                                `{{Roll=${finalRollValue} vs DC ${dc} (Nat1:${isNat1}, Nat20:${isNat20})}}` +
+                                `{{Roll=${finalRollValue} vs DC ${dc} (Nat1:${isNat1}, Nat20:${isNat20})}}}` +
                                 `{{Outcome=${resultMessage}}}`;
 
             // Show relevant original price(s) and calculated adjustment(s)
@@ -8998,7 +9330,7 @@ const ShopSystem = {
         },
     },
 
-    // [TAG: MERGED_8] // This tag needs to be fixed
+    // [TAG: MERGED_8] // This tag needs to be fixed (You can update this tag later if needed)
     commands: {
         // [TAG: MERGED_9] - Fixed command routing
         handleCommand: function(msg) {
@@ -9006,30 +9338,35 @@ const ShopSystem = {
             
             // Handle API commands
             if (msg.type === "api") {
-            const args = msg.content.split(" ");
-            const command = args[0].toLowerCase();
+                // Parse arguments respecting quotes
+                const allArgs = ShopSystem.utils.parseCommandArgs(msg.content);
+                if (!allArgs || allArgs.length === 0) { // Handle empty or malformed command string
+                    ShopSystem.utils.log("Empty or malformed command received after parsing.", "warn");
+                    return;
+                }
+                const command = allArgs[0].toLowerCase(); // This is !shop or !itemdb etc.
+                const args = allArgs.slice(1); // These are the arguments *after* the main command particle
 
             // Debug log the command
             ShopSystem.utils.log(`Command received: ${command}`, "info");
-            
-            // Route commands correctly
-                if (command === CONFIG.COMMANDS.SHOP_PREFIX) {
-                    // Special case for just "!shop" with no args
-                    if (args.length === 1) {
-                        // If no active shop, show the shop list
+                ShopSystem.utils.log(`Parsed arguments: ${JSON.stringify(args)}`, "debug"); 
+                
+                // Route commands correctly based on the main command particle
+                if (command === CONFIG.COMMANDS.SHOP_PREFIX) { // CONFIG.COMMANDS.SHOP_PREFIX is likely "!shop"
+                    // Special case for just "!shop" with no further arguments
+                    if (args.length === 0) { 
                         if (!ShopSystem.state.activeShop) {
                             ShopSystem.shop.SHPDIS_MD_ShowShopList(msg.playerid);
                         } else {
-                            // Otherwise, show the active shop
                             ShopSystem.shop.SHPDIS_MD_ShowShopMenu(ShopSystem.state.activeShop.name, msg.playerid, msg);
                         }
-                        return;
+                        return; // Command handled
                     }
-                    // Route to shop command handler for other commands
-                ShopSystem.shop.HNDL_CMD_HandleShopCommand(msg, args.slice(1));
-                } else if (command === CONFIG.COMMANDS.DB_PREFIX) {
+                    // Route to shop command handler for other !shop sub-commands
+                    ShopSystem.shop.HNDL_CMD_HandleShopCommand(msg, args); // Pass the already sliced 'args'
+                } else if (command === CONFIG.COMMANDS.DB_PREFIX) { // CONFIG.COMMANDS.DB_PREFIX is likely "!itemdb"
                 // Route to database command handler
-                ShopSystem.database.handleDatabaseCommand(msg, args.slice(1));
+                    ShopSystem.database.handleDatabaseCommand(msg, args); // Pass the already sliced 'args'
                 }
             }
             // Handle general messages during import
@@ -9096,7 +9433,6 @@ const ShopSystem = {
             
             // Log successful initialization
             ShopSystem.utils.log(`ShopSystem v${CONFIG.version} initialized successfully!`, "success");
-            ShopSystem.utils.chat(`✅ Shop System v${CONFIG.version} Ready!`);
             // [TAG: CD_BASKET_LAST_MODIFIED_TRACKING] Ensure lastModifiedBasketItem state exists on system init
             if (!state.ShopSystem.lastModifiedBasketItem) {
                 state.ShopSystem.lastModifiedBasketItem = {};
@@ -9125,8 +9461,10 @@ const ShopSystem = {
 
 // [TAG: MERGED_12_DB_35_SHOP_168] // This tag needs to be fixed
 on('ready', function() {
-    // Initialize the system
     ShopSystem.init();
+    if (typeof CommandMenu !== 'undefined' && CommandMenu.utils && CommandMenu.utils.addInitStatus) {
+        CommandMenu.utils.addInitStatus('ShopSystem', 'success', null, 'success');
+    }
 });
 
 // [TAG: DB_36_SHOP_169] // This tag needs to be fixed
@@ -9236,7 +9574,7 @@ on('chat:message', function(msg) {
                     return; // Ignore if skill doesn't match
                 }
 
-                // Check if Waiting for Second Roll (for expected Adv/DisAdv, got simple/normal first)
+                // Check if Waiting for Second Roll (for expected Adv/Disadv, got simple/normal first)
                  if (pending.firstRollValue !== undefined && pending.firstRollValue !== null) {
                      ShopSystem.utils.log(`  - Second roll detected: ${finalRollValue}. First was: ${pending.firstRollValue}. Expecting: ${pending.advantage}`, 'debug');
                     const firstRoll = pending.firstRollValue;
