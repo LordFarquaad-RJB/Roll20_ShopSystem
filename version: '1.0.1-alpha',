@@ -15,11 +15,10 @@
  * [TAG: DB_15_Normalize_Price_Data_in_an_Item] - Not Required (duplicate of DB_9)
  * [TAG: DB_16_Normalize_All_Prices_in_the_Database] - Not Required (duplicate of DB_10)
  * [TAG: DB_27_Normalize_All_Prices_in_the_Database] - Not Required (duplicate functionality)
- */
-
-/* Configuration and Constants
+ *
+ * Configuration and Constants
  * [TAG: MG_DB_2_SHOP_2_Configuration_and_Constants]
- */
+ **/
 const CONFIG = {
         version: '1.0.0',
         debug: false,
@@ -613,7 +612,13 @@ const ShopSystem = {
             return new Promise((resolve, reject) => {
                 handout.get("notes", function(notes) {
                     try {
-                        let cleanedNotes = notes.replace(/<[^>]*>/g, '');
+                        let cleanedNotes = notes;
+                        let lastCleaned;
+                        do {
+                            lastCleaned = cleanedNotes;
+                            cleanedNotes = cleanedNotes.replace(/<[^>]*>/g, '');
+                        } while (cleanedNotes !== lastCleaned);
+                        
                         cleanedNotes = cleanedNotes.replace(/&quot;/g, '"');
                         cleanedNotes = cleanedNotes.replace(/&amp;/g, '&');
                         cleanedNotes = cleanedNotes.replace(/&lt;/g, '<');
@@ -633,7 +638,13 @@ const ShopSystem = {
         cleanHandoutNotes(notes) {
             if (!notes) return "";
             
-            let cleanedNotes = notes.replace(/<[^>]*>/g, '');
+            let cleanedNotes = notes;
+            let lastCleaned;
+            do {
+                lastCleaned = cleanedNotes;
+                cleanedNotes = cleanedNotes.replace(/<[^>]*>/g, '');
+            } while (cleanedNotes !== lastCleaned);
+
             cleanedNotes = cleanedNotes.replace(/&quot;/g, '"');
             cleanedNotes = cleanedNotes.replace(/&amp;/g, '&');
             cleanedNotes = cleanedNotes.replace(/&lt;/g, '<');
@@ -880,64 +891,68 @@ const ShopSystem = {
         },
 
         // [TAG: UTIL_GET_CHAR_CURRENCY] Helper to get character currency, handling different sheet types
-        // TODO: Replace with official Roll20 API (e.g., getSheetItem) when available
-        getCharacterCurrency: function(characterId) {
+        // Updated to use async getSheetItem API
+        getCharacterCurrency: async function(characterId) {
             const currency = { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 };
             const char = getObj('character', characterId);
             if (!char) {
                 this.log(`Character not found for ID: ${characterId}`, 'error');
-                return currency; // Return zeroed currency
+                return currency;
             }
 
             const charName = char.get('name');
             this.log(`💰 Getting currency for ${charName} (ID: ${characterId})`, 'debug');
 
             // --- Check for Standard D&D 5e Sheet Attributes First ---
-            const standardAttrs = ['pp', 'gp', 'ep', 'sp', 'cp'];
-            let foundStandard = false;
-            standardAttrs.forEach(coin => {
-                // Use getAttrByName for robustness against missing attributes
-                const attrVal = getAttrByName(characterId, coin);
-                if (attrVal !== undefined && attrVal !== null && attrVal !== "") {
-                    currency[coin] = parseInt(attrVal) || 0;
-                    if (currency[coin] > 0) foundStandard = true; // Only count if value > 0
-                    this.log(` -> Found standard attribute ${coin}: ${currency[coin]}`, 'debug');
+            const standardAttrNames = ['pp', 'gp', 'ep', 'sp', 'cp'];
+            try {
+                const standardPromises = standardAttrNames.map(attr => getSheetItem(characterId, attr));
+                const standardValues = await Promise.all(standardPromises);
+                
+                let foundStandard = false;
+                standardValues.forEach((val, index) => {
+                    if (val !== undefined && val !== null && val !== "") {
+                        const coin = standardAttrNames[index];
+                        currency[coin] = parseInt(val) || 0;
+                        if (currency[coin] > 0) foundStandard = true;
+                    }
+                });
+
+                if (foundStandard) {
+                    this.log(` -> Using standard attributes for ${charName}.`, 'debug');
+                    return currency;
                 }
-            });
-
-
-            // If standard attributes found (and have values), return those
-            if (foundStandard) {
-                this.log(` -> Using standard attributes for ${charName}.`, 'debug');
-                return currency;
+            } catch (e) {
+                this.log(` -> Error checking standard currency attributes for ${charName}: ${e.message}`, 'warn');
             }
 
-            // --- Check for Beacon Sheet Attributes (money_*) ---
-            const beaconAttrs = {
-                pp: 'money_pp',
-                gp: 'money_gp',
-                ep: 'money_ep',
-                sp: 'money_sp',
-                cp: 'money_cp'
-            };
-            let foundBeacon = false;
-            Object.entries(beaconAttrs).forEach(([coin, attrName]) => {
-                // Use getAttrByName for robustness
-                const attrVal = getAttrByName(characterId, attrName);
-                 if (attrVal !== undefined && attrVal !== null && attrVal !== "") {
-                    currency[coin] = parseInt(attrVal) || 0;
-                     if (currency[coin] > 0) foundBeacon = true; // Only count if value > 0
-                    this.log(` -> Found Beacon attribute ${attrName}: ${currency[coin]}`, 'debug');
+            // --- If not found, check for Beacon Sheet Attributes (money_*) ---
+            const beaconAttrMapping = { pp: 'money_pp', gp: 'money_gp', ep: 'money_ep', sp: 'money_sp', cp: 'money_cp' };
+            const beaconAttrNames = Object.values(beaconAttrMapping);
+            try {
+                const beaconPromises = beaconAttrNames.map(attr => getSheetItem(characterId, attr));
+                const beaconValues = await Promise.all(beaconPromises);
+
+                let foundBeacon = false;
+                beaconValues.forEach((val, index) => {
+                    if (val !== undefined && val !== null && val !== "") {
+                        const coin = Object.keys(beaconAttrMapping).find(key => beaconAttrMapping[key] === beaconAttrNames[index]);
+                        if (coin) {
+                            currency[coin] = parseInt(val) || 0;
+                            if (currency[coin] > 0) foundBeacon = true;
+                        }
+                    }
+                });
+
+                if (foundBeacon) {
+                    this.log(` -> Using Beacon attributes for ${charName}.`, 'debug');
+                    return currency;
                 }
-            });
-
-
-            if (foundBeacon) {
-                this.log(` -> Using Beacon attributes for ${charName}.`, 'debug');
-                return currency;
+            } catch(e) {
+                this.log(` -> Error checking Beacon currency attributes for ${charName}: ${e.message}`, 'warn');
             }
-
-            // --- Check for Beacon Sheet Store Attribute (Fallback) ---
+            
+            // --- Fallback to Beacon Sheet Store Attribute ---
             const storeAttr = findObjs({
                 _type: 'attribute',
                 _characterid: characterId,
@@ -949,25 +964,21 @@ const ShopSystem = {
                 try {
                     let storeData = storeAttr.get('current');
                     if (typeof storeData === 'string') {
-                        // Add extra check for empty string before parsing
                         if (storeData.trim() === '') {
                             this.log(` -> Beacon 'store' attribute is empty for ${charName}.`, 'debug');
-                             throw new Error("Store attribute is empty"); // Throw error to skip this method
+                            throw new Error("Store attribute is empty");
                         }
                         storeData = JSON.parse(storeData);
                     }
 
                     if (typeof storeData === 'object' && storeData !== null) {
                         const storeCurrencies = {};
-                        // Recursive function to search through nested objects in store
                         const searchForCurrency = (obj) => {
                             if (!obj) return;
                             if (Array.isArray(obj)) {
                                 obj.forEach(item => searchForCurrency(item));
                             } else if (typeof obj === 'object') {
-                                // Check if this object *is* the currency entry
                                 if (obj.name && obj.type === "Currency" && typeof obj.value === 'number') {
-                                     // Make sure name is one of the expected currencies before assigning
                                     const coinName = obj.name.toLowerCase();
                                     if (coinName === 'platinum') storeCurrencies.pp = obj.value;
                                     else if (coinName === 'gold') storeCurrencies.gp = obj.value;
@@ -975,14 +986,12 @@ const ShopSystem = {
                                     else if (coinName === 'silver') storeCurrencies.sp = obj.value;
                                     else if (coinName === 'copper') storeCurrencies.cp = obj.value;
                                 }
-                                // Also search inside its properties
                                 Object.values(obj).forEach(value => searchForCurrency(value));
                             }
                         };
                         searchForCurrency(storeData);
 
-                        // Only override if values were found in store
-                         let foundInStore = false;
+                        let foundInStore = false;
                         if (storeCurrencies.pp !== undefined) { currency.pp = storeCurrencies.pp; foundInStore = true; }
                         if (storeCurrencies.gp !== undefined) { currency.gp = storeCurrencies.gp; foundInStore = true; }
                         if (storeCurrencies.ep !== undefined) { currency.ep = storeCurrencies.ep; foundInStore = true; }
@@ -993,7 +1002,7 @@ const ShopSystem = {
                             this.log(` -> Using Beacon 'store' attribute for ${charName}.`, 'debug');
                             return currency;
                         } else {
-                             this.log(` -> No currency found within Beacon 'store' attribute for ${charName}.`, 'debug');
+                            this.log(` -> No currency found within Beacon 'store' attribute for ${charName}.`, 'debug');
                         }
                     }
                 } catch (e) {
@@ -1001,18 +1010,108 @@ const ShopSystem = {
                 }
             }
 
-            // --- If no known attributes found ---
             this.log(` -> No standard or Beacon currency attributes found for ${charName}. Returning zeroed currency.`, 'warn');
-            return { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 }; // Return explicit zeroed object
+            return { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 };
         },
 
-    // [TAG: UTIL_SET_CHAR_CURRENCY] Helper to set character currency, handling different sheet types
-    // Used by both purchasing and selling functionality to update character funds
-    // TODO: Replace with official Roll20 API (e.g., setSheetItem) when available
-        setCharacterCurrency: function(characterId, newCurrency) {
-            ShopSystem.utils.log(`Placeholder: setCharacterCurrency called for CharID ${characterId}. Needs implementation via official API.`, 'warn');
-            // Always return false for now, forcing manual update message.
-            return false;
+        // [TAG: UTIL_SET_CHAR_CURRENCY] Helper to set character currency, handling different sheet types
+        // Updated to use async setSheetItem API
+        setCharacterCurrency: async function(characterId, newCurrency) {
+            const char = getObj('character', characterId);
+            if (!char) {
+                this.log(`Character not found for ID: ${characterId} when trying to set currency`, 'error');
+                return false;
+            }
+
+            const charName = char.get('name');
+            this.log(`💰 Setting currency for ${charName} (ID: ${characterId}) to: ` +
+                    `${newCurrency.pp || 0}pp, ${newCurrency.gp || 0}gp, ${newCurrency.ep || 0}ep, ${newCurrency.sp || 0}sp, ${newCurrency.cp || 0}cp`, 'debug');
+
+            // --- Check for Standard D&D 5e Sheet Attributes ---
+            try {
+                const gpAttr = await getSheetItem(characterId, 'gp');
+                // Check for existence of at least one attribute
+                if (gpAttr !== undefined && gpAttr !== null) {
+                    this.log(` -> Found standard attributes for ${charName}. Updating...`, 'debug');
+                    const standardPromises = ['pp', 'gp', 'ep', 'sp', 'cp'].map(coin => 
+                        setSheetItem(characterId, coin, newCurrency[coin] || 0)
+                    );
+                    await Promise.all(standardPromises);
+                    return true; // Success
+                }
+            } catch (e) {
+                this.log(` -> Error checking/setting standard currency for ${charName}: ${e.message}`, 'warn');
+            }
+
+            // --- If not found, check for Beacon Sheet Attributes (money_*) ---
+            try {
+                const moneyGpAttr = await getSheetItem(characterId, 'money_gp');
+                // Check for existence of at least one attribute
+                if (moneyGpAttr !== undefined && moneyGpAttr !== null) {
+                    this.log(` -> Found Beacon attributes for ${charName}. Updating...`, 'debug');
+                    const beaconAttrMapping = { pp: 'money_pp', gp: 'money_gp', ep: 'money_ep', sp: 'money_sp', cp: 'money_cp' };
+                    const beaconPromises = Object.entries(beaconAttrMapping).map(([coin, attrName]) => 
+                        setSheetItem(characterId, attrName, newCurrency[coin] || 0)
+                    );
+                    await Promise.all(beaconPromises);
+                    return true; // Success
+                }
+            } catch(e) {
+                this.log(` -> Error checking/setting Beacon currency for ${charName}: ${e.message}`, 'warn');
+            }
+
+            // --- Fallback to Beacon Sheet Store Attribute ---
+            const storeAttr = findObjs({ _type: 'attribute', _characterid: characterId, name: 'store' })[0];
+            if (storeAttr) {
+                this.log(` -> Attempting fallback update via Beacon 'store' attribute for ${charName}.`, 'debug');
+                try {
+                    let storeData = storeAttr.get('current');
+                    if (typeof storeData === 'string') {
+                        if (storeData.trim() === '') {
+                            this.log(` -> Beacon 'store' attribute is empty, cannot update currency within it.`, 'debug');
+                            throw new Error("Store attribute is empty");
+                        }
+                        storeData = JSON.parse(storeData || '{}');
+                    }
+                    if (typeof storeData === 'object' && storeData !== null) {
+                        let storeUpdated = false;
+                        const updateCurrencyInStore = (obj) => {
+                            if (!obj) return;
+                            if (Array.isArray(obj)) {
+                                obj.forEach(item => updateCurrencyInStore(item));
+                            } else if (typeof obj === 'object') {
+                                if (obj.name && obj.type === "Currency") {
+                                    const coinName = obj.name.toLowerCase();
+                                    const newValue = newCurrency[coinName.substring(0, 2)] || 0;
+                                    if (obj.value !== newValue) {
+                                        obj.value = newValue;
+                                        storeUpdated = true;
+                                        this.log(` -> Updated ${obj.name} in store to ${newValue}`, 'debug');
+                                    }
+                                }
+                                Object.values(obj).forEach(value => {
+                                    if (typeof value === 'object') {
+                                        updateCurrencyInStore(value);
+                                    }
+                                });
+                            }
+                        };
+                        updateCurrencyInStore(storeData);
+                        if (storeUpdated) {
+                            storeAttr.set('current', JSON.stringify(storeData));
+                            this.log(` -> Updated currency within Beacon 'store' attribute for ${charName}.`, 'debug');
+                            return true; // Success
+                        } else {
+                            this.log(` -> No currency objects found to update within Beacon 'store' for ${charName}.`, 'debug');
+                        }
+                    }
+                } catch (e) {
+                    this.log(` -> Error updating Beacon 'store' attribute for ${charName}: ${e.message}`, 'warn');
+                }
+            }
+            
+            this.log(` -> Could not find any known currency attributes to update for ${charName}.`, 'error');
+            return false; // Return false if no update method succeeded
         },
 
         // [TAG: UTIL_GET_TOKEN_IMAGE_ASYNC] Helper to get character token image tag asynchronously
@@ -1476,7 +1575,7 @@ const ShopSystem = {
                 "&{template:default}",
                 "{{name=📚 Item Database Help}}",
                 "{{About=The Item Database system allows you to manage and organize items for your shops. Items are organized by category and rarity for easy access.}}",
-                "{{Suggestions=It's recommended to import items to your item database on a seperate test game/campaign as the import is via the chat and it looks messy, you can then copy the handout over to your live game/campaign.}}",
+                "{{Suggestions=It's recommended to import items to your item database on a separate test game/campaign as the import is via the chat and it looks messy, you can then copy the handout over to your live game/campaign.}}",
                 "{{Categories=• Weapons\n• Armor & Attire\n• Equipment\n• Potions\n• Scrolls\n• Magic Items\n• Mounts & Vehicles\n• Services}}",
                 "{{Rarities=• Common\n• Uncommon\n• Rare\n• Very Rare\n• Legendary}}",
                 "{{Database Actions=",
@@ -2109,165 +2208,6 @@ const ShopSystem = {
                 ShopSystem.utils.log(`Error during item removal process: ${error.message}`, "error");
                 ShopSystem.utils.chat(`❌ An error occurred while removing the item. Check logs.`, playerID);
             });
-        },
-                // [TAG: UTIL_SET_CHAR_CURRENCY] Helper to set character currency, handling different sheet types
-        setCharacterCurrency: function(characterId, newCurrency) {
-            const char = getObj('character', characterId);
-            if (!char) {
-                this.log(`Character not found for ID: ${characterId} when trying to set currency`, 'error');
-                return false;
-            }
-
-            const charName = char.get('name');
-            this.log(`💰 Setting currency for ${charName} (ID: ${characterId}) to: ` +
-                     `${newCurrency.pp || 0}pp, ${newCurrency.gp || 0}gp, ${newCurrency.ep || 0}ep, ${newCurrency.sp || 0}sp, ${newCurrency.cp || 0}cp`, 'debug');
-
-            let updated = false;
-            let attributeUpdated = false; // Track if any attribute was successfully set
-
-            // Helper to set attribute value
-            const setAttribute = (attrName, value) => {
-                let attr = findObjs({ _type: 'attribute', _characterid: characterId, name: attrName })[0];
-                if (attr) {
-                    attr.set('current', value);
-                    this.log(` -> Updated attribute ${attrName} to ${value}`, 'debug');
-                    attributeUpdated = true; // Mark that we found and updated an attribute
-                    return true;
-                } else {
-                    // Optionally create the attribute if it doesn't exist
-                    // createObj('attribute', { name: attrName, current: value, characterid: characterId });
-                    // this.log(` -> Created and set attribute ${attrName} to ${value}`, 'debug');
-                     this.log(` -> Attribute ${attrName} not found, could not update.`, 'debug');
-                    return false;
-                }
-            };
-
-
-            // --- Attempt to update Standard D&D 5e Sheet Attributes ---
-            const standardAttrs = ['pp', 'gp', 'ep', 'sp', 'cp'];
-            let foundStandard = false;
-             standardAttrs.forEach(coin => {
-                // Check if attribute exists before trying to set it
-                const attrExists = findObjs({ _type: 'attribute', _characterid: characterId, name: coin })[0];
-                 if (attrExists) {
-                    foundStandard = true; // Mark that we found standard attributes
-                    setAttribute(coin, newCurrency[coin] || 0);
-                 }
-            });
-
-
-            // If we found and updated standard attributes, consider it done for this type
-            if (foundStandard && attributeUpdated) {
-                this.log(` -> Updated standard attributes for ${charName}.`, 'debug');
-                return true;
-            }
-            // If we found standard attributes but failed to update (shouldn't happen with setAttribute), log error
-             else if (foundStandard && !attributeUpdated) {
-                 this.log(` -> Found standard attributes for ${charName}, but failed to update them.`, 'warn');
-                 // Continue trying other methods just in case
-            }
-
-
-            // --- Attempt to update Beacon Sheet Attributes (money_*) ---
-            const beaconAttrs = {
-                pp: 'money_pp',
-                gp: 'money_gp',
-                ep: 'money_ep',
-                sp: 'money_sp',
-                cp: 'money_cp'
-            };
-            let foundBeacon = false;
-            attributeUpdated = false; // Reset tracker for this method
-             Object.entries(beaconAttrs).forEach(([coin, attrName]) => {
-                // Check if attribute exists
-                const attrExists = findObjs({ _type: 'attribute', _characterid: characterId, name: attrName })[0];
-                 if (attrExists) {
-                    foundBeacon = true; // Mark that we found Beacon attributes
-                     setAttribute(attrName, newCurrency[coin] || 0);
-                 }
-            });
-
-
-            if (foundBeacon && attributeUpdated) {
-                this.log(` -> Updated Beacon attributes for ${charName}.`, 'debug');
-                return true;
-            } else if (foundBeacon && !attributeUpdated) {
-                 this.log(` -> Found Beacon attributes for ${charName}, but failed to update them.`, 'warn');
-                 // Continue trying other methods
-            }
-
-            // --- Attempt to update Beacon Sheet Store Attribute (Fallback) ---
-            // Note: This is less reliable and might have side effects
-            const storeAttr = findObjs({
-                _type: 'attribute',
-                _characterid: characterId,
-                name: 'store'
-            })[0];
-
-            if (storeAttr) {
-                this.log(` -> Attempting fallback update via Beacon 'store' attribute for ${charName}.`, 'debug');
-                try {
-                    let storeData = storeAttr.get('current');
-                     if (typeof storeData === 'string') {
-                         // Check if empty before parsing
-                         if (storeData.trim() === '') {
-                             this.log(` -> Beacon 'store' attribute is empty, cannot update currency within it.`, 'debug');
-                             throw new Error("Store attribute is empty");
-                         }
-                        storeData = JSON.parse(storeData || '{}'); // Ensure it's an object
-                    }
-
-                    if (typeof storeData === 'object' && storeData !== null) {
-                        let storeUpdated = false;
-                        // Recursive function to find and update currency objects
-                        const updateCurrencyInStore = (obj) => {
-                            if (!obj) return;
-                            if (Array.isArray(obj)) {
-                                obj.forEach(item => updateCurrencyInStore(item));
-                            } else if (typeof obj === 'object') {
-                                if (obj.name && obj.type === "Currency") {
-                                    const coinName = obj.name.toLowerCase();
-                                     const newValue = newCurrency[coinName.substring(0, 2)] || 0; // Get pp, gp, etc.
-                                     if (obj.value !== newValue) {
-                                        obj.value = newValue;
-                                        storeUpdated = true;
-                                         this.log(` -> Updated ${obj.name} in store to ${newValue}`, 'debug');
-                                    }
-                                }
-                                // Recurse into properties
-                                Object.values(obj).forEach(value => {
-                                     if (typeof value === 'object') { // Only recurse into objects/arrays
-                                        updateCurrencyInStore(value);
-                                    }
-                                });
-                            }
-                        };
-
-                        updateCurrencyInStore(storeData);
-
-                        if (storeUpdated) {
-                            storeAttr.set('current', JSON.stringify(storeData)); // Save the modified store data
-                            this.log(` -> Updated currency within Beacon 'store' attribute for ${charName}.`, 'debug');
-                            updated = true;
-                            return true; // Successfully updated via store attribute
-                        } else {
-                            this.log(` -> No currency objects found to update within Beacon 'store' for ${charName}.`, 'debug');
-                        }
-                    }
-                } catch (e) {
-                    this.log(` -> Error updating Beacon 'store' attribute for ${charName}: ${e.message}`, 'warn');
-                }
-            }
-
-             // If no methods worked
-            if (!foundStandard && !foundBeacon && !updated) {
-                 this.log(` -> Could not find any known currency attributes to update for ${charName}.`, 'error');
-            } else if (!attributeUpdated && !updated) {
-                 // If attributes were found but not updated (and store didn't update)
-                 this.log(` -> Found currency attributes but failed to update them for ${charName}.`, 'error');
-            }
-
-            return updated || attributeUpdated; // Return true if any update method succeeded
         },
 
         // [TAG: DB_35_show_add_item_menu]
@@ -7417,7 +7357,7 @@ const ShopSystem = {
         },
 
         // [TAG: SHOP_85_confirm_purchase] // Updated for Buy/Sell Haggle Display & Net Transaction
-        confirmPurchase(playerId, charId) {
+        async confirmPurchase(playerId, charId) {
             const character = getObj('character', charId);
             if (!character) {
                 ShopSystem.utils.sendMessage('❌ Character not found!', getObj('player', playerId)?.get('_displayname'));
@@ -7485,7 +7425,7 @@ const ShopSystem = {
             // --- End Price Calculation ---
 
             // Get character currency
-            const charCurrency = ShopSystem.utils.getCharacterCurrency(charId);
+            const charCurrency = await ShopSystem.utils.getCharacterCurrency(charId);
             const charCopper = ShopSystem.utils.toCopper(charCurrency);
 
             // Check if character has enough funds if they need to pay
@@ -7550,7 +7490,7 @@ const ShopSystem = {
         },
 
         // [TAG: DUP_SHOP_86(43)_complete_purchase] // Updated for Buy/Sell Haggle & Net Transaction
-        completePurchase(playerId, charId) {
+        async completePurchase(playerId, charId) {
             const character = getObj('character', charId);
             if (!character) {
                 ShopSystem.utils.sendMessage('❌ Character not found!', getObj('player', playerId)?.get('_displayname'));
@@ -7619,7 +7559,7 @@ const ShopSystem = {
 
 
             // Get character currency
-            const charCurrency = ShopSystem.utils.getCharacterCurrency(charId);
+            const charCurrency = await ShopSystem.utils.getCharacterCurrency(charId);
             const charCopper = ShopSystem.utils.toCopper(charCurrency);
 
             // Verify funds again (safety check)
@@ -7636,7 +7576,7 @@ const ShopSystem = {
             const newCurrency = ShopSystem.utils.fromCopper(finalFundsCopper);
 
             // --- Update Character Currency ---
-            const currencyUpdated = ShopSystem.utils.setCharacterCurrency(charId, newCurrency);
+            const currencyUpdated = await ShopSystem.utils.setCharacterCurrency(charId, newCurrency);
             let currencyUpdateMessage = currencyUpdated ? "Yes" : "**Manual Update Needed!**";
             if (!currencyUpdated) {
                 ShopSystem.utils.sendMessage(`⚠️ Could not automatically update currency for ${character.get('name')}. Please update manually. New balance: ${ShopSystem.utils.formatCurrency(newCurrency)}`, getObj('player', playerId)?.get('_displayname'));
@@ -7982,7 +7922,7 @@ const ShopSystem = {
         },
 
         // [TAG: BASKET_SELL_05]
-        checkoutSell(playerId) {
+        async checkoutSell(playerId) {
             if (!state.ShopSystem.sellBaskets || 
                 !state.ShopSystem.sellBaskets[playerId] || 
                 state.ShopSystem.sellBaskets[playerId].length === 0) {
@@ -8018,7 +7958,7 @@ const ShopSystem = {
             });
             
             // Get character's current currency
-            const charCurrency = ShopSystem.utils.getCharacterCurrency(characterId);
+            const charCurrency = await ShopSystem.utils.getCharacterCurrency(characterId);
             const totalCopper = ShopSystem.utils.toCopper(totalPrice);
             
             // Calculate new total
@@ -8041,7 +7981,7 @@ const ShopSystem = {
         },
 
         // [TAG: BASKET_SELL_06]
-        completeSell(playerId, characterId) {
+        async completeSell(playerId, characterId) {
             if (!state.ShopSystem.sellBaskets || 
                 !state.ShopSystem.sellBaskets[playerId] || 
                 state.ShopSystem.sellBaskets[playerId].length === 0) {
@@ -8077,14 +8017,14 @@ const ShopSystem = {
             const totalCopper = ShopSystem.utils.toCopper(totalPrice);
             
             // Get character's current currency
-            const charCurrency = ShopSystem.utils.getCharacterCurrency(characterId);
+            const charCurrency = await ShopSystem.utils.getCharacterCurrency(characterId);
             const charCopper = ShopSystem.utils.toCopper(charCurrency);
             
             // Calculate new currency
             const newCurrency = ShopSystem.utils.fromCopper(charCopper + totalCopper);
             
             // Update character's currency
-            const currencyUpdated = ShopSystem.utils.setCharacterCurrency(characterId, newCurrency);
+            const currencyUpdated = await ShopSystem.utils.setCharacterCurrency(characterId, newCurrency);
             if (!currencyUpdated) {
                 ShopSystem.utils.chat(`⚠️ Could not automatically update currency for ${character.get('name')}. Please update manually to add ${ShopSystem.utils.formatCurrency(totalPrice)}.`, playerId);
             }
@@ -8261,7 +8201,7 @@ const ShopSystem = {
 
         // [TAG: CD_RECEIPT_GENERATION] // New helper function for generating receipts
         // Added originalPriceCopper parameter
-        generatePurchaseReceipt: function(playerId, charId, purchasedItems, totalPrice, oldCurrency, newCurrency, originalPriceCopper = null) {
+        generatePurchaseReceipt: async function(playerId, charId, purchasedItems, totalPrice, oldCurrency, newCurrency, originalPriceCopper = null) {
             const character = getObj('character', charId);
             const player = getObj('player', playerId);
             if (!character || !player) return; // Should not happen if called from completePurchase
@@ -8323,9 +8263,7 @@ const ShopSystem = {
                  }
              }
 
-
             receiptContent += `<p><strong>Total Cost:</strong> ${ShopSystem.utils.formatCurrency(totalPrice)}</p>`;
-
 
             // Format currency display helper
             const formatCurrencyDetail = (currencyObj) => {
@@ -8339,21 +8277,19 @@ const ShopSystem = {
                 return parts.length > 0 ? parts.join(', ') : '0 Gold';
             };
 
-
             receiptContent += `<p><strong>Previous Funds:</strong> ${formatCurrencyDetail(oldCurrency)}</p>`;
             receiptContent += `<p><strong>Funds After Purchase:</strong> ${formatCurrencyDetail(newCurrency)}</p>`;
             receiptContent += `<hr>`; // Separator
 
             receiptContent += `<p><em>Thank you for your purchase!</em></p>`;
-             // Add note about manual currency update only if automatic update failed
-             // Check if update *actually* failed using the return value of setCharacterCurrency
-             const currencySetSuccessfully = ShopSystem.utils.setCharacterCurrency(charId, newCurrency); // Check again, or pass the result down
+            // Add note about manual currency update only if automatic update failed
+            // Check if update *actually* failed using the return value of setCharacterCurrency
+            const currencySetSuccessfully = await ShopSystem.utils.setCharacterCurrency(charId, newCurrency); // Check again, or pass the result down
             if (!currencySetSuccessfully) {
                 receiptContent += `<p><strong>IMPORTANT:</strong> <em style="color: red;">Could not automatically update character sheet currency. Please update manually.</em></p>`;
             } else {
-                 receiptContent += `<p><em>Your character sheet currency should be updated automatically.</em></p>`;
+                receiptContent += `<p><em>Your character sheet currency should be updated automatically.</em></p>`;
             }
-
 
             receiptContent += `</div>`; // Close styling div
 
@@ -8364,7 +8300,6 @@ const ShopSystem = {
                 controlledby: playerId,     // Ensure player can see it
                 archived: false
             });
-
 
             if (receiptHandout) {
                 // Set notes content asynchronously
